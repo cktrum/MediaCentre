@@ -48,8 +48,10 @@
 							</thead>
 							<tr>
 								<td ng-repeat="video in channel">
-									<p><img src="{{video.thumbnail}}"/></p>
-									<p><a class="small_link" target="_blank" href="{{video.url}}">{{video.title}}</a></p>
+									<a class="small_link" target="_blank" href="{{video.url}}">
+										<p><img src="{{video.thumbnail}}"/></p>
+										{{video.title}}
+									</a>
 								</td>
 							<tr>	
 						</table>
@@ -73,8 +75,10 @@
 							</thead>
 							<tr>
 								<td ng-repeat="video in channel">
-									<p><img src="{{video.thumbnail}}"/></p>
-									<p><a class="small_link" target="_blank" href="{{video.url}}">{{video.title}}</a></p>
+									<a class="small_link" target="_blank" href="{{video.url}}">
+										<p><img src="{{video.thumbnail}}"/></p>
+										{{video.title}}
+									</a>
 								</td>
 							<tr>	
 						</table>

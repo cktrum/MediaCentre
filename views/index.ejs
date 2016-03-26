@@ -1,0 +1,132 @@
+<html ng-app="app">
+<head>
+	<title><%= title %></title>
+	<link rel='stylesheet' href='/stylesheets/style.css' />
+	<link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
+
+    <!-- Optional Bootstrap theme -->
+    <link rel="stylesheet" href="stylesheets/bootstrap-theme.min.css">
+</head>
+<body>
+	<h1><%= title %></h1>
+
+	<ng-view></ng-view>
+
+	<script src='http://ajax.googleapis.com/ajax/libs/angularjs/1.3.2/angular.min.js'></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-route.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-resource.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="javascripts/bootstrap.min.js"></script>
+
+	<!-- Template -->   
+	<script type="text/ng-template" id="/overview.html">
+	    <div class="panel panel-default" ng-show="numberNewVideos">
+        	    <div class="panel-heading">New Videos</div>
+    			<div class="panel-body">
+					<div ng-repeat="(name, channel) in videos" class="table-responsive">
+						<table class="table">
+							<thead>
+							    <tr>
+							      <th colspan="100%" align="left">{{name}}</th>
+							    </tr>
+							</thead>
+							<tr>
+								<td ng-repeat="video in channel">
+									<p><img src="{{video.thumbnail}}"/></p>
+									<p><a target="_blank" href="{{video.url}}">{{video.title}}</a></p>
+								</td>
+							<tr>	
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="panel panel-default" ng-show="numberOldVideos">
+				<div class="panel-heading">Already Seen</div>
+    			<div class="panel-body">
+					<div ng-repeat="(name, channel) in oldVideos" class="table-responsive">
+						<table class="table">
+							<thead>
+							    <tr>
+							      <th colspan="100%" align="left">{{name}} </th>
+							    </tr>
+							</thead>
+							<tr>
+								<td ng-repeat="video in channel">
+									<p><img src="{{video.thumbnail}}"/></p>
+									<p><a target="_blank" href="{{video.url}}">{{video.title}}</a></p>
+								</td>
+							<tr>	
+						</table>
+					</div>
+				</div>
+			</div>
+
+		<input ng-model="newChannel" type="text" placeholder="New Channel">
+		<button ng-click="addNewChannel()">Add</button>
+	</script>
+	
+	<script>
+		angular.module('app', ['ngRoute', 'ngResource'])
+
+	        // Service
+	        .factory('youtube', ['$http', function($http){
+	        	return {
+	        		newVideos: function () {
+	        			return $http.get('/api/youtube/new')
+	        		},
+
+	        		oldVideos: function () {
+	        			return $http.get('/api/youtube/old')
+	        		},
+
+	        		addChannel: function (channelName) {
+	        			return $http.post('/api/youtube/channel/new', {channelName: channelName})
+	        		}
+	        	}
+	        }])
+
+		    // Controller
+		    .controller('overviewController', ['$scope', 'youtube', function ($scope, youtube) {
+		    	
+				youtube.newVideos().success(function (data) {
+					$scope.videos = data
+					var number = 0
+					for (channel in data) {
+						number += data[channel].length
+					}
+					$scope.numberNewVideos = number
+				})
+
+				youtube.oldVideos().success(function (data) {
+					$scope.oldVideos = data
+					var number = 0
+					for (channel in data) {
+						number += data[channel].length
+					}
+					$scope.numberOldVideos = number
+				})
+
+				$scope.addNewChannel = function () {
+					youtube.addChannel($scope.newChannel)
+				}
+		    }])
+
+		    .controller('TodoDetailCtrl', ['$scope', '$routeParams', 'Todos', function ($scope, $routeParams, Todos) {
+		    	$scope.todo = Todos.get({id: $routeParams.id });
+		    }])
+
+	        //---------------
+	        // Routes
+	        //---------------
+
+	        .config(['$routeProvider', function ($routeProvider) {
+	        	$routeProvider
+	        	.when('/', {
+	        		templateUrl: '/overview.html',
+	        		controller: 'overviewController'
+	        	})
+
+	        }]);
+	    </script>
+	</body>
+</html>

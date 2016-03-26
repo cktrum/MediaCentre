@@ -1,0 +1,21 @@
+.navbar-default {
+  background-color: white;
+  border-color: rgba(34, 34, 34, 0.05);
+  font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-transition: all 0.35s;
+  -moz-transition: all 0.35s;
+  transition: all 0.35s;
+}
+.navbar-default .navbar-brand {
+  font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700
+}
+#mainNav {
+	margin-bottom: 20px;
+}
+.small_link {
+	font-size: 10;
+}
+.btn-link {
+  color: black;
+}

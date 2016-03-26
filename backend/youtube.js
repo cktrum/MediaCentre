@@ -3,7 +3,7 @@ var request 	= require('request'),
 	_ 			= require('lodash'),
 	database	= require('./database.js')
 
-var serverkey
+var serverkey = null
 
 /**
  ** Retrieve the channel ID given a channel name and save it to the database
@@ -34,8 +34,7 @@ function getChannelIdToUsername(username) {
 					})
 					.catch(deferred.reject)
 			} else {
-				console.log('body has no items tag')
-				deferred.reject('unexpected response format')
+				deferred.reject('no matches found')
 			}
 		} else {
 			console.log('failed to get channel ID for ' + username, error)
@@ -257,6 +256,39 @@ function getVideosOfChannels(channels) {
 	return deferred.promise
 }
 
+function channelsForQuery(query) {
+	var deferred = q.defer()
+
+	var parameters = {
+		url: 'https://www.googleapis.com/youtube/v3/search',
+		qs: {
+			part: 'id,snippet',
+			q: query,
+			type: 'channel',
+			key: serverkey
+		}
+	}
+
+	request(parameters, function (error, response, body) {
+		if (response.statusCode == 200) {
+			body = JSON.parse(body)
+			var channels = body.items.map(function (item) {
+				if (item.id.kind == 'youtube#channel')
+					return {
+						id: item.id.channelId,
+						name: item.snippet.channelTitle
+					}
+			})
+			deferred.resolve(channels)
+		} else {
+			console.log("error", response.statusCode, error)
+			deferred.reject(error)
+		}
+	})
+
+	return deferred.promise
+}
+
 exports.getNewVideos = function(req, res) {
 
 	database.getAPIKey('youtube')
@@ -289,8 +321,9 @@ exports.getOldVideos = function(req, res) {
 }
 
 exports.addChannel = function(req, res) {
-	var channelName = req.body.channelName
-	getChannelIdToUsername(channelName)
+	var id = req.body.id
+	var name = req.body.name
+	database.saveYoutubeChannel(id, name)
 		.then(function (response) {
 			res.sendStatus(200)
 		})
@@ -300,7 +333,7 @@ exports.addChannel = function(req, res) {
 }
 
 exports.removeChannel = function(req, res) {
-	var channel = req.query.name
+	var channel = req.query.id
 	database.removeYoutubeChannel(channel)
 		.then(function (response) {
 			res.sendStatus(200)
@@ -317,4 +350,32 @@ exports.saveKey = function(req, res) {
 		.then(function (response) {
 			res.json(response).send()
 		})
+}
+
+exports.searchChannel = function(req, res) {
+	if (!serverkey) {
+		database.getAPIKey('youtube')
+		.then(function (result) {
+			serverkey = result.key
+
+			var query = req.query.query
+			channelsForQuery(query)
+				.then(function (response) {
+					res.json(response).send()
+				})
+				.catch(function (err) {
+					res.json(err).sendStatus(500)
+				})
+		})
+	} else {
+		var query = req.query.query
+		channelsForQuery(query)
+			.then(function (response) {
+				res.json(response).send()
+			})
+			.catch(function (err) {
+				res.json(err).sendStatus(500)
+			})
+	}
+	
 }

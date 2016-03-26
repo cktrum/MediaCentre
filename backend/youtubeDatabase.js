@@ -57,10 +57,10 @@ exports.saveYoutubeChannel = function (id, username) {
  **	Remove a channel from the database with all videos of that channel
  ** @param: 	name 	- String
  **/
-exports.removeYoutubeChannel = function (name) {
+exports.removeYoutubeChannel = function (id) {
 	var deferred = q.defer()
 	var promises = [
-		channelModel.findOneAndRemove({username: name}, function (err, resp) {
+		channelModel.findOneAndRemove({_id: id}, function (err, resp) {
 			if (err) {
 				deferred.reject(err)
 			} else {
@@ -68,7 +68,7 @@ exports.removeYoutubeChannel = function (name) {
 			}
 		}),
 
-		youtubeVideoModel.remove({channelName: name}, function (err, resp) {
+		youtubeVideoModel.remove({channel: id}, function (err, resp) {
 			if (err) {
 				deferred.reject(err)
 			} else {
@@ -147,7 +147,6 @@ function saveSingleVideo(video) {
 		if (err) {
 			deferred.reject(err)
 		} else {
-			console.log(JSON.stringify(post, null, 2))
 			deferred.resolve(post)
 		}
 	})

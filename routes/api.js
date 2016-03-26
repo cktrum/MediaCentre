@@ -14,15 +14,18 @@ router.get('/youtube/new', youtube.getNewVideos)
 */
 router.get('/youtube/old', youtube.getOldVideos)
 
+router.get('/youtube/channel', youtube.searchChannel)
+
 /*
  * POST /api/youtube/channel/new
- * parameters: channelName - String
+ * parameters: 	id 		- String
+ * 				name 	- String
 */
 router.post('/youtube/channel/new', youtube.addChannel)
 
 /*
  * DELETE /api/youtube/channel/delete
- * parameters: name - String
+ * parameters: id - String
 */
 router.delete('/youtube/channel/delete', youtube.removeChannel)
 

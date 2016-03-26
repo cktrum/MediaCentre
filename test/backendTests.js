@@ -7,13 +7,28 @@ chai.use(chaiAsPromised)
 var api = supertest.agent('http://localhost:3000/api')
 
 var data = {
-	newChannel: 'bbcradio1'
+	channelID: null,
+	channelName: null
 }
 
 describe('The youtube API allows:', function () {
+	it('GET /api/youtube/channel to get channels matching a query', function (done) {
+		api.get('/youtube/channel')
+			.query({query: 'test'})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body.should.be.instanceOf(Array)
+				res.body[0].should.have.properties('id', 'name')
+				data.channelID = res.body[0].id
+				data.channelName = res.body[0].name
+				done()
+			})
+	})
+
 	it('POST /api/youtube/channel/new for adding a new channel', function (done) {
 		api.post('/youtube/channel/new')
-			.send({channelName: data.newChannel})
+			.send({id: data.channelID, name: data.channelName})
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
@@ -26,8 +41,8 @@ describe('The youtube API allows:', function () {
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
-				res.body.should.have.property(data.newChannel)
-				res.body[data.newChannel].should.be.instanceOf(Array)
+				res.body.should.have.property(data.channelName)
+				res.body[data.channelName].should.be.instanceOf(Array)
 				done()
 			})
 	})
@@ -37,9 +52,9 @@ describe('The youtube API allows:', function () {
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
-				res.body.should.have.property(data.newChannel)
-				res.body[data.newChannel].should.be.instanceOf(Array)
-				res.body[data.newChannel][0].should.have.properties(
+				res.body.should.have.property(data.channelName)
+				res.body[data.channelName].should.be.instanceOf(Array)
+				res.body[data.channelName][0].should.have.properties(
 					'_id', 
 					'title', 
 					'publishedAt', 
@@ -50,14 +65,14 @@ describe('The youtube API allows:', function () {
 					'crawled',
 					'seen'
 				)
-				res.body[data.newChannel][0]['seen'].should.be.instanceOf(Boolean)
+				res.body[data.channelName][0]['seen'].should.be.instanceOf(Boolean)
 				done()	
 			})
 	})
 
 	it('DELETE /api/youtube/channel/delete to delete a channel', function (done) {
 		api.delete('/youtube/channel/delete')
-			.query({name: data.newChannel})
+			.query({id: data.channelID})
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
@@ -65,7 +80,7 @@ describe('The youtube API allows:', function () {
 					.expect(200)
 					.end(function (err, res) {
 						should.not.exist(err)
-						res.body.should.not.have.property(data.newChannel)
+						res.body.should.not.have.property(data.channelID)
 						done()
 				})
 			})

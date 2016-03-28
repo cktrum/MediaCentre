@@ -97,8 +97,8 @@ exports.removeYoutubeChannel = function (id) {
 	return youtubeDB.removeYoutubeChannel(id)
 }
 
-exports.getYoutubeVideos = function () {
-	return youtubeDB.getYoutubeVideos()
+exports.getYoutubeVideosForChannel = function (channel, limit, offset) {
+	return youtubeDB.getYoutubeVideosForChannel(channel, limit, offset)
 }
 
 exports.saveYoutubeVideos = function (videos) {

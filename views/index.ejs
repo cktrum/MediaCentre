@@ -6,85 +6,94 @@
 	<link rel='stylesheet' href='/stylesheets/style.css' />
 	<link rel='stylesheet' href='/stylesheets/index.css' />
 
-    <!-- Optional Bootstrap theme -->
-    <link rel="stylesheet" href="stylesheets/bootstrap-theme.min.css">
+	<!-- Optional Bootstrap theme -->
+	<link rel="stylesheet" href="stylesheets/bootstrap-theme.min.css">
 </head>
 <body>
 	<script src='http://ajax.googleapis.com/ajax/libs/angularjs/1.3.2/angular.min.js'></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-route.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-resource.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="javascripts/bootstrap.min.js"></script>
-    <script type="text/javascript" src="javascripts/autocomplete.js"></script>
+	<script src="javascripts/bootstrap.min.js"></script>
+	<script type="text/javascript" src="javascripts/autocomplete.js"></script>
 
 
 	<nav id="mainNav" class="navbar-default navbar-fixed-top">
-        <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-                <p class="navbar-brand"><%= title %></p>
-            </div>
-        </div>
-    </nav>
+		<div class="container-fluid">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="navbar-header">
+				<p class="navbar-brand"><%= title %></p>
+			</div>
+		</div>
+	</nav>
 
 	<ng-view></ng-view>
 
 	<!-- Template -->   
 	<script type="text/ng-template" id="/overview.html">
-	    <div class="panel panel-default" ng-show="numberNewVideos">
-        	    <div class="panel-heading">New Videos</div>
-    			<div class="panel-body">
-					<div ng-repeat="(name, channel) in videos" class="table-responsive">
-						<table class="table" ng-show="channel.length">
-							<thead>
-							    <tr>
-							      <th colspan="100%" align="left">
-							      	{{name}}
-							      	<button type="submit" class="btn btn-link" ng-click="removeChannel(name,channel[0].channel)">
-							      		<span class="glyphicon glyphicon-remove-circle"></span>
-							      	</button>
-							      </th>
-							    </tr>
-							</thead>
-							<tr>
-								<td ng-repeat="video in channel">
+		<div class="panel panel-default" ng-show="youtube.new_total">
+			<div class="panel-heading">New Videos</div>
+			<div class="panel-body">
+				<div class="col-md-12" ng-show="values.videos.length" ng-repeat="(channel, values) in youtube.new">
+					<h5>
+						<a target="_blank" href="https://youtube.com/channel/{{values.videos[0].channel}}">{{channel}}</a>
+						<button type="submit" class="btn btn-link remove-channel" ng-click="removeChannel(channel,values.videos[0].channel)">
+							<span class="glyphicon glyphicon-remove-circle"></span>
+						</button>
+					</h5>
+					<div class="carousel slide" id="carousel{{$index}}">
+						<div class="carousel-inner">
+							<div class="item" ng-repeat="video in values.videos" ng-class="{'active': video.isActive}">
+								<div class="col-xs-2 col-md-2 col-sm-2">
 									<a class="small_link" target="_blank" href="{{video.url}}">
 										<p><img src="{{video.thumbnail}}"/></p>
 										{{video.title}}
 									</a>
-								</td>
-							<tr>	
-						</table>
+								</div>
+							</div>
+						</div>
+						<button type="submit" class="left carousel-control btn-link" ng-click="carouselPrev(channel, values.videos[0], 'new')" >
+							<span class="glyphicon glyphicon-chevron-left"></span>
+						</button>
+						<button type="submit" class="right carousel-control btn-link" ng-click="carouselNext(channel, values.videos[0], 'new')">
+							<span class="glyphicon glyphicon-chevron-right"></span>
+						</button>
 					</div>
 				</div>
 			</div>
-			<div class="panel panel-default" ng-show="numberOldVideos">
-				<div class="panel-heading">Already Seen</div>
-    			<div class="panel-body">
-					<div ng-repeat="(name, channel) in oldVideos" class="table-responsive">
-						<table class="table" ng-show="channel.length">
-							<thead>
-							    <tr>
-							      <th colspan="100%" align="left">
-							      	{{name}}
-							      	<button type="submit" class="btn btn-link" ng-click="removeChannel(name,channel[0].channel)">
-							      		<span class="glyphicon glyphicon-remove-circle"></span>
-							      	</button>
-							      </th>
-							    </tr>
-							</thead>
-							<tr>
-								<td ng-repeat="video in channel">
+		</div>
+
+		<div class="panel panel-default" ng-show="youtube.old_total">
+			<div class="panel-heading">Already Seen</div>
+			<div class="panel-body">
+				<div class="col-md-12" ng-repeat="(channel, values) in youtube.old" ng-show="values.videos.length">
+					<h5>
+						<a target="_blank" href="https://youtube.com/channel/{{values.videos[0].channel}}">{{channel}}</a>
+						<button type="submit" class="btn btn-link remove-channel" ng-click="removeChannel(channel,values.videos[0].channel)">
+							<span class="glyphicon glyphicon-remove-circle"></span>
+						</button>
+					</h5>
+					<div id="carousel{{$index}}" class="carousel slide">
+						<div class="carousel-inner">
+							<div class="item" ng-repeat="video in values.videos" ng-class="{'active': $index < 6}">
+								<div class="col-xs-2 col-md-2 col-sm-2">
 									<a class="small_link" target="_blank" href="{{video.url}}">
 										<p><img src="{{video.thumbnail}}"/></p>
 										{{video.title}}
 									</a>
-								</td>
-							<tr>	
-						</table>
+								</div>
+							</div>
+						</div>
+						<button type="submit" class="left carousel-control btn-link" ng-click="carouselPrev(channel, values.videos[0], 'old')">
+							<span class="glyphicon glyphicon-chevron-left"></span>
+						</button>
+						<button type="submit" class="right carousel-control btn-link" ng-click="carouselNext(channel, values.videos[0], 'old')">
+							<span class="glyphicon glyphicon-chevron-right"></span>
+						</button>
 					</div>
 				</div>
 			</div>
+		</div>
 
 		<div class="row">
 			<div class="col-sm-6">
@@ -95,113 +104,170 @@
 			</div>
 		</div>
 	</script>
-	
+
 	<script>
 		angular.module('app', ['ngRoute', 'autocomplete'])
 
-	        // Service
-	        .factory('youtube', ['$http', function($http){
-	        	return {
-	        		newVideos: function () {
-	        			return $http.get('/api/youtube/new')
-	        		},
+		  // Service
+		  .factory('youtube', ['$http', function($http){
+		  	return {
+		  		newVideos: function (limit, offset) {
+		  			return $http.get('/api/youtube/new?limit=' + limit + '&offset=' + offset)
+		  		},
 
-	        		oldVideos: function () {
-	        			return $http.get('/api/youtube/old')
-	        		},
+		  		oldVideos: function (limit, offset) {
+		  			return $http.get('/api/youtube/old?limit=' + limit + '&offset=' + offset)
+		  		},
 
-	        		addChannel: function (id, name) {
-	        			return $http.post('/api/youtube/channel/new', {id: id, name: name})
-	        		},
+		  		oldVideosOfChannel: function (channelID, limit, offset) {
+		  			return $http.get('/api/youtube/old?channelID=' + channelID + '&limit=' + limit + '&offset=' + offset)
+		  		},
 
-	        		searchChannel: function (query) {
-	        			return $http.get('/api/youtube/channel?query='+query)
-	        		},
+		  		addChannel: function (id, name) {
+		  			return $http.post('/api/youtube/channel/new', {id: id, name: name})
+		  		},
 
-	        		removeChannel: function (id) {
-	        			return $http.delete('/api/youtube/channel/delete?id='+id)
-	        		}
-	        	}
-	        }])
+		  		searchChannel: function (query) {
+		  			return $http.get('/api/youtube/channel?query='+query)
+		  		},
 
-		    // Controller
-		    .controller('overviewController', ['$scope', 'youtube', function ($scope, youtube) {
-		    	
-				youtube.newVideos().success(function (data) {
-					$scope.videos = data
-					var number = 0
-					for (channel in data) {
-						number += data[channel].length
-					}
-					$scope.numberNewVideos = number
-				})
+		  		removeChannel: function (id) {
+		  			return $http.delete('/api/youtube/channel/delete?id='+id)
+		  		}
+		  	}
+		  }])
 
-				youtube.oldVideos().success(function (data) {
-					$scope.oldVideos = data
-					var number = 0
-					for (channel in data) {
-						number += data[channel].length
-					}
-					$scope.numberOldVideos = number
-				})
+			// Controller
+			.controller('overviewController', ['$scope', 'youtube', function ($scope, youtube) {
+				
+				$scope.youtube = {
+					old: {},
+					old_total: 0,
+					new: {},
+					new_total: 0
+				}
+				$scope.channelMapping = {}
 
-				$scope.reload = function () {
-					youtube.newVideos().success(function (data) {
-						$scope.videos = data
+				var loadNewVideos = function () {
+					youtube.newVideos(10, 0).success(function (data) {
 						var number = 0
 						for (channel in data) {
 							number += data[channel].length
+							$scope.youtube.new[channel] = {}
+							$scope.youtube.new[channel].videos = data[channel]
+							$scope.youtube.new[channel].offset = 6
+							$scope.youtube.new[channel].limit = 10
+							for (var i = 0; i < data[channel].length; i++) {
+								$scope.youtube.new[channel].videos[i].isActive = (i < 6)
+							}
 						}
-						$scope.numberNewVideos = number
+						$scope.youtube.new_total = number
 					})
 				}
+
+				var loadOldVideos = function () {
+					youtube.oldVideos(6, 0).success(function (data) {
+						var number = 0
+						for (channel in data) {
+							number += data[channel].length
+							$scope.youtube.old[channel] = {}
+							$scope.youtube.old[channel].videos = data[channel]
+							$scope.youtube.old[channel].offset = 6
+							$scope.youtube.old[channel].limit = 6
+						}
+						$scope.youtube.old_total = number
+					})
+				}
+
+				loadNewVideos()
+				loadOldVideos()
 
 				$scope.addNewChannel = function () {
 					var name = $scope.channelInput
 					var id = $scope.channelMapping[name]
 					youtube.addChannel(id, name).success(function (data) {
 						$scope.channelInput = ""
-						$scope.reload()
+						loadNewVideos()
 					})
 				}
 
 				$scope.searchForChannel = function() {
 					var query = $scope.channelInput
-					var mapping = {}
 					youtube.searchChannel(query).success(function (data) {
 						var channels = data.map(function (item) {
-							mapping[item.name] = item.id
+							$scope.channelMapping[item.name] = item.id
 							return item.name
 						})
 						$scope.suggestedChannels = channels
-						$scope.channelMapping = mapping
 					})
 				}
 
 				$scope.removeChannel = function(name, id) {
 					youtube.removeChannel(id).success(function (data) {
-						delete $scope.oldVideos[name]
-						delete $scope.videos[name]
+						delete $scope.youtube.new[name]
+						delete $scope.youtube.old[name]
 					})
 				}
-		    }])
 
-		    .controller('TodoDetailCtrl', ['$scope', '$routeParams', 'Todos', function ($scope, $routeParams, Todos) {
-		    	$scope.todo = Todos.get({id: $routeParams.id });
-		    }])
+				$scope.carouselPrev = function(name, channel, category) {	
+					var move_for = 3
+					var new_offset = $scope.youtube[category][name].offset - 3*move_for
+					if (category == 'old') {
+						if (new_offset >= 0) {
+				  		var channel_id = channel.channel
+				  		youtube.oldVideosOfChannel(channel_id, move_for, new_offset).success(function (data) {
+			  				$scope.youtube[category][name].videos.splice(-move_for, move_for)
+				  			$scope.youtube[category][name].videos = data[name].concat($scope.youtube[category][name].videos)
+				  			$scope.youtube[category][name].offset -= move_for
+				  		})
+						}
+					}	else {
+						if ($scope.youtube[category][name].offset > 2 * move_for) {
+							for (var i = 0; i < $scope.youtube[category][name].videos.length; i++) {
+								$scope.youtube[category][name].videos[i].isActive = (i >= new_offset && i < new_offset+2*move_for)
+							}
+							$scope.youtube[category][name].offset -= move_for
+						}
+					}	
+					
+				}
 
-	        //---------------
-	        // Routes
-	        //---------------
+				$scope.carouselNext = function(name, channel, category) {
+					var channel_id = channel.channel
+					var move_for = 3
+					if (category == 'old') {
 
-	        .config(['$routeProvider', function ($routeProvider) {
-	        	$routeProvider
-	        	.when('/', {
-	        		templateUrl: '/overview.html',
-	        		controller: 'overviewController'
-	        	})
+						youtube.oldVideosOfChannel(channel_id, move_for, $scope.youtube[category][name].offset).success(function (data) {
+							if (data[name].length > 0) {
+								$scope.youtube[category][name].videos.splice(0, Math.min(move_for, data[name].length))
+				  			$scope.youtube[category][name].videos = $scope.youtube[category][name].videos.concat(data[name])
+								$scope.youtube[category][name].offset += move_for
+							}
+						})
+					} else {
+						if ($scope.youtube[category][name].offset + move_for < $scope.youtube[category][name].videos.length) {
+							var available = Math.max($scope.youtube[category][name].videos.length - $scope.youtube[category][name].offset, 0)
+							$scope.youtube[category][name].offset += Math.min(move_for, available)
+							for (var i = 0; i < $scope.youtube[category][name].videos.length; i++) {
+								$scope.youtube[category][name].videos[i].isActive = (i >= $scope.youtube[category][name].offset - Math.min(move_for, available) && i <= $scope.youtube[category][name].offset)
+							}
+						}
+					}
+				}
+			}])
 
-	        }]);
-	    </script>
+		  //---------------
+		  // Routes
+		  //---------------
+
+		  .config(['$routeProvider', function ($routeProvider) {
+		  	$routeProvider
+		  	.when('/', {
+		  		templateUrl: '/overview.html',
+		  		controller: 'overviewController'
+		  	})
+
+		  }]);
+		</script>
 	</body>
 </html>

@@ -52,8 +52,9 @@ function getChannelIdToUsername(username) {
  ** 			resultSet 	- Array
  **				pageToken 	- String (initially set to 'null')
  **/
-function getNewVideosOfChannel(channelId, date, resultSet, pageToken) {
+function getNewVideosOfChannel(channelId, date, limit, offset, resultSet, pageNumber, pageToken) {
 	var deferred = q.defer()
+	var resultsPerPage = 10
 	var parameters = {
 		url: 'https://www.googleapis.com/youtube/v3/search',
 		qs: {
@@ -61,7 +62,8 @@ function getNewVideosOfChannel(channelId, date, resultSet, pageToken) {
 			channelId: channelId,
 			order: 'date',
 			publishedAfter: date,
-			key: serverkey
+			key: serverkey,
+			maxResults: resultsPerPage
 		}
 	}
 
@@ -75,11 +77,29 @@ function getNewVideosOfChannel(channelId, date, resultSet, pageToken) {
 			var ids = body.items.map(function (item) {
 				return item.id.videoId
 			})
+
+			// check if current page has overlap with desired offset
+			if (offset > pageNumber*resultsPerPage) {
+				var left = offset - pageNumber*resultsPerPage
+				// the whole page can be skipped
+				if (left > resultsPerPage) {
+					ids = []
+				} else {
+					// only parts of this page are relevant
+					for (var i = 0; i < offset - pageNumber*resultsPerPage; i++) {
+						ids.shift()
+					}
+				}
+			}
+			// page contains more result than wanted --> cut of the rest
+			if (resultSet.length + ids.length > limit) {
+				ids.splice(0, limit - resultSet.length)
+			}
 			resultSet = resultSet.concat(ids)
 
-			if (body.items.length == body.pageInfo.resultsPerPage && resultSet.length <= 10) {
+			if (body.items.length == body.pageInfo.resultsPerPage && resultSet.length < limit) {
 				var pageToken = body.nextPageToken
-				getNewVideosOfChannel(channelId, date, resultSet, pageToken)
+				getNewVideosOfChannel(channelId, date, limit, offset, resultSet, pageNumber+1, pageToken)
 					.then(deferred.resolve)
 					.catch(deferred.reject)
 			} else {
@@ -103,14 +123,18 @@ function getVideosOfChannelByUsername(username)
 
 	getChannelIdToUsername(username)
 	.then(function (channelId) {
-		var today = new Date()
-		var lastWeek = today - 1000 * 60 * 60 * 24 * 7 * 2
-		var isoDate = (new Date(lastWeek)).toISOString()
-		getNewVideosOfChannel(channelId, isoDate, [])
-		.then(function (ids) {
-			getVideosById(ids)
-			.then (deferred.resolve)
-		})
+		if (channelId) {
+			var today = new Date()
+			var lastWeek = today - 1000 * 60 * 60 * 24 * 7 * 2
+			var isoDate = (new Date(lastWeek)).toISOString()
+			getNewVideosOfChannel(channelId, isoDate, [], 1)
+			.then(function (ids) {
+				getVideosById(ids)
+				.then (deferred.resolve)
+			})
+		} else {
+			deferred.resolve({})
+		}
 	})
 
 	return deferred.promise
@@ -143,7 +167,9 @@ function getVideosById(ids)
 					title: item.snippet.title,
 					publishedAt: item.snippet.publishedAt,
 					thumbnail: item.snippet.thumbnails.default.url,
-					url: 'https://youtube.com/watch?v=' + item.id
+					url: 'https://youtube.com/watch?v=' + item.id,
+					channel: item.snippet.channelId,
+					channelName: item.channelTitle
 				}
 			})
 			deferred.resolve(items)
@@ -191,7 +217,7 @@ function saveVideos(videos, channel) {
 	return deferred.promise
 }
 
-function getVideoForChannel(channel) {
+function getVideoForChannel(channel, limit, offset) {
 	var deferred = q.defer()
 
 	var timestamp = Date.now() - 1000 * 60 * 60 * 24 * 7 * 4
@@ -200,7 +226,7 @@ function getVideoForChannel(channel) {
 
 	timestamp = new Date(timestamp).toISOString()
 
-	getNewVideosOfChannel(channel._id, timestamp, [])
+	getNewVideosOfChannel(channel._id, timestamp, limit, offset, [], 1)
 		.then(getVideosById)
 		.then(function (videos) {
 			database.updateLastChecked('youtube', channel._id)
@@ -229,7 +255,7 @@ function getVideoForChannel(channel) {
  ** Get all newly published videos for the specified channels
  ** @param: 	channels 	- Array
  **/
-function getVideosOfChannels(channels) {
+function getVideosOfChannels(channels, limit, offset) {
 	var deferred = q.defer()
 	var promises = []
 	var videos = {}
@@ -237,7 +263,7 @@ function getVideosOfChannels(channels) {
 	for (index in channels) {
 		var channel = channels[index]
 		promises.push(
-			getVideoForChannel(channel)
+			getVideoForChannel(channel, limit, offset)
 				.then(function (result) {
 					videos[result.channel] = result.videos
 				})
@@ -290,14 +316,17 @@ function channelsForQuery(query) {
 }
 
 exports.getNewVideos = function(req, res) {
+	var limit = req.query.limit
+	var offset = req.query.offset
+	var channelID = req.query.channelID
 
 	database.getAPIKey('youtube')
 		.then(function (result) {
 			serverkey = result.key
 
-			database.getYoutubeChannels()
+			database.getYoutubeChannels([channelID])
 				.then(function (result) {
-					getVideosOfChannels(result)
+					getVideosOfChannels(result, limit, offset)
 						.then(function (videos) {
 							res.json(videos).send()
 						})
@@ -306,23 +335,72 @@ exports.getNewVideos = function(req, res) {
 						})
 				})
 		})
+}
 
+function retrieveVideosForChannel(id, limit, offset) {
+	var deferred = q.defer()
+
+	database.getYoutubeVideosForChannel(id, limit, offset)
+		.then(deferred.resolve)
+		.catch(deferred.reject)
+
+	return deferred.promise
+}
+
+function promisesToRetrieveVideosForChannels(limit, offset, channel) {
+	var deferred = q.defer()
+	var promises = []
+
+	if (!channel) {
+		database.getYoutubeChannels()
+			.then(function (channels) {
+				var allVideos = {}
+				for (var channel in channels) {
+					var id = channels[channel]._id
+					promises.push(retrieveVideosForChannel(id, limit, offset))
+				}
+				deferred.resolve(promises)
+			})
+			.catch(function (err) {
+				deferred.reject(err)
+			})
+	} else {
+		promises.push(retrieveVideosForChannel(channel, limit, offset))
+		deferred.resolve(promises)
+	}
+
+	return deferred.promise
 }
 
 exports.getOldVideos = function(req, res) {
-	database.getYoutubeVideos()
-		.then(function (videos) {
-			videos = _.groupBy(videos, 'channelName')
-			res.json(videos).send()
+	var limit = req.query.limit
+	var offset = req.query.offset
+	var channelID = req.query.channelID
+
+	promisesToRetrieveVideosForChannels(limit, offset, channelID)
+		.then(function (promises) {
+			q.allSettled(promises)
+				.then(function (result) {
+					var videos = {}
+					for (var index in result) {
+						var channel = result[index].value
+						videos[channel.name] = channel.videos
+					}
+					res.json(videos).send()
+				})
+				.catch(function (err) {
+					res.json(err).sendStatus(500)
+				})
 		})
 		.catch(function (err) {
 			res.json(err).sendStatus(500)
-		})
+		})	
 }
 
 exports.addChannel = function(req, res) {
 	var id = req.body.id
 	var name = req.body.name
+	console.log(id, name)
 	database.saveYoutubeChannel(id, name)
 		.then(function (response) {
 			res.sendStatus(200)

@@ -1,20 +1,22 @@
 var supertest 	= require('supertest'),
 	should 		= require('should'),
-	chai    = require('chai'),
-	chaiAsPromised = require('chai-as-promised')
+	chai    	= require('chai'),
+	chaiAsPromised = require('chai-as-promised'),
+	_ 			= require('lodash')
 
 chai.use(chaiAsPromised)
 var api = supertest.agent('http://localhost:3000/api')
 
 var data = {
 	channelID: null,
-	channelName: null
+	channelName: null,
+	firstVideo: null
 }
 
 describe('The youtube API allows:', function () {
 	it('GET /api/youtube/channel to get channels matching a query', function (done) {
 		api.get('/youtube/channel')
-			.query({query: 'test'})
+			.query({query: 'SpinninRec'})
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
@@ -38,17 +40,20 @@ describe('The youtube API allows:', function () {
 
 	it('GET /api/youtube/new for getting newly published videos', function (done) {
 		api.get('/youtube/new')
+			.query({limit: 20, offset: 0})
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
 				res.body.should.have.property(data.channelName)
 				res.body[data.channelName].should.be.instanceOf(Array)
+				res.body[data.channelName].length.should.be.equal(20)
 				done()
 			})
 	})
 
 	it('GET /api/youtube/old for getting saved videos', function (done) {
 		api.get('/youtube/old')
+			.query({limit: 20, offset: 0})
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
@@ -66,7 +71,36 @@ describe('The youtube API allows:', function () {
 					'seen'
 				)
 				res.body[data.channelName][0]['seen'].should.be.instanceOf(Boolean)
+				res.body[data.channelName].length.should.be.equal(20)
+				data.firstVideo = res.body[data.channelName][0]
 				done()	
+			})
+	})
+
+	it('GET /api/youtube/old for getting saved videos with pagination', function (done) {
+		api.get('/youtube/old')
+			.query({limit: 15, offset: 1})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body.should.have.property(data.channelName)
+				res.body[data.channelName].should.be.instanceOf(Array)
+				res.body[data.channelName].length.should.be.equal(15)
+				res.body[data.channelName].should.not.containEql(data.firstVideo)
+				done()	
+			})
+	})
+
+	it('GET /api/youtube/old for getting saved videos for a specific channel', function (done) {
+		api.get('/youtube/old')
+			.query({channelID: data.channelID, limit: 15, offset: 1})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				_.size(res.body).should.be.equal(1)
+				res.body.should.have.property(data.channelName)
+				res.body[data.channelName].should.be.instanceOf(Array)
+				done()
 			})
 	})
 
@@ -85,4 +119,5 @@ describe('The youtube API allows:', function () {
 				})
 			})
 	})
+	
 })

@@ -16,6 +16,17 @@
 .small_link {
 	font-size: 10;
 }
-.btn-link {
+.remove-channel {
   color: black;
+  font-size: 80%;
 }
+.carousel-control {
+  width: 5%;
+  height: 60%;
+ }
+.carousel-control.left {
+  background-image: none;
+ }
+ .carousel-control.right {
+  background-image: none;
+ }

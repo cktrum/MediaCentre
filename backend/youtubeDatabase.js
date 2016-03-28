@@ -87,16 +87,31 @@ exports.removeYoutubeChannel = function (id) {
 /**
  ** Get all saved youtube channels
  **/
-exports.getYoutubeChannels = function() {
+exports.getYoutubeChannels = function(ids) {
 	var deferred = q.defer()
+	if (ids && ids.length > 0) {
+		console.log(ids)
+		channelModel.find()
+			.where('_id').in(ids).ne(null)
+			.exec(function (err, result) {
+			if (err) {
+				deferred.reject(err)
+			} else {
+				deferred.resolve(result)
+			}
+		})
+	} else {
+		channelModel.find()
+			.where('_id').ne(null)
+			.exec(function (err, result) {
+			if (err) {
+				deferred.reject(err)
+			} else {
+				deferred.resolve(result)
+			}
+		})
+	}
 
-	channelModel.find(function (err, result) {
-		if (err) {
-			deferred.reject(err)
-		} else {
-			deferred.resolve(result)
-		}
-	})
 
 	return deferred.promise
 }
@@ -121,19 +136,42 @@ exports.updateLastChecked = function (channelID) {
 
 /**
  **	Get all saved youtube videos sorted by channel and publishing date
+ ** Each channel has the same limit and offset
  **/ 
-exports.getYoutubeVideos = function() {
+exports.getYoutubeVideosForChannel = function(channel, limit, offset) {
 	var deferred = q.defer()
 
-	youtubeVideoModel.find()
-		.sort({channelName: 1, publishedAt: -1})
-		.exec(function (err, result) {
-		if (err) {
+	channelModel.findById(channel, function (err, resp) {
+		if (err || !resp) {
 			deferred.reject(err)
-		} else {
-			deferred.resolve(result)
 		}
+
+		if (!resp.username) {
+			deferred.reject('channel ID ' + channel + 'not found')
+			return
+		}
+
+		var channelName = resp.username
+		limit = parseInt(limit)
+		offset = parseInt(offset)
+
+		youtubeVideoModel.find({channel: channel})
+			.skip(offset)
+			.limit(limit)
+			.sort({publishedAt: -1})
+			.exec(function (err, result) {
+			if (err) {
+				deferred.reject(err)
+			} else {
+				var response = {
+					name: channelName,
+					videos: result
+				}
+				deferred.resolve(response)
+			}
+		})
 	})
+
 
 	return deferred.promise
 }

@@ -4,13 +4,16 @@ var express = require('express'),
 var router = express.Router()
 
 /* GET /api/youtube/new
- * parameters: -
+ * parameters: 	limit	- Integer
+ * 				offset 	- Integer
 */
 router.get('/youtube/new', youtube.getNewVideos)
 
 /*
  * GET /api/youtube/old
- * parameters: -
+ * parameters: 	limit		- Integer
+ * 				offset 		- Integer
+ *				channelID	- String (optional)
 */
 router.get('/youtube/old', youtube.getOldVideos)
 

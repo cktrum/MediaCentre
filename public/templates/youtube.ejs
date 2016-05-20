@@ -1,0 +1,72 @@
+<div class="panel panel-default" ng-show="youtube.new_total">
+	<div class="panel-heading">New Videos</div>
+	<div class="panel-body">
+		<div class="col-md-12" ng-show="values.videos.length" ng-repeat="(channel, values) in youtube.new">
+			<h5>
+				<a target="_blank" href="https://youtube.com/channel/{{values.videos[0].channel}}">{{channel}}</a>
+				<button type="submit" class="btn btn-link remove-channel" ng-click="removeChannel(channel,values.videos[0].channel)">
+					<span class="glyphicon glyphicon-remove-circle"></span>
+				</button>
+			</h5>
+			<div class="carousel slide" id="carousel{{$index}}">
+				<div class="carousel-inner">
+					<div class="item" ng-repeat="video in values.videos" ng-class="{'active': video.isActive}">
+						<div class="col-xs-2 col-md-2 col-sm-2">
+							<a class="small_link" target="_blank" href="{{video.url}}">
+								<p><img src="{{video.thumbnail}}"/></p>
+								{{video.title}}
+							</a>
+						</div>
+					</div>
+				</div>
+				<button type="submit" class="left carousel-control btn-link" ng-click="carouselPrev(channel, values.videos[0], 'new')" >
+					<span class="glyphicon glyphicon-chevron-left"></span>
+				</button>
+				<button type="submit" class="right carousel-control btn-link" ng-click="carouselNext(channel, values.videos[0], 'new')">
+					<span class="glyphicon glyphicon-chevron-right"></span>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="panel panel-default" ng-show="youtube.old_total">
+	<div class="panel-heading">Already Seen</div>
+	<div class="panel-body">
+		<div class="col-md-12" ng-repeat="(channel, values) in youtube.old" ng-show="values.videos.length">
+			<h5>
+				<a target="_blank" href="https://youtube.com/channel/{{values.videos[0].channel}}">{{channel}}</a>
+				<button type="submit" class="btn btn-link remove-channel" ng-click="removeChannel(channel,values.videos[0].channel)">
+					<span class="glyphicon glyphicon-remove-circle"></span>
+				</button>
+			</h5>
+			<div id="carousel{{$index}}" class="carousel slide">
+				<div class="carousel-inner">
+					<div class="item" ng-repeat="video in values.videos" ng-class="{'active': $index < 6}">
+						<div class="col-xs-2 col-md-2 col-sm-2">
+							<a class="small_link" target="_blank" href="{{video.url}}">
+								<p><img src="{{video.thumbnail}}"/></p>
+								{{video.title}}
+							</a>
+						</div>
+					</div>
+				</div>
+				<button type="submit" class="left carousel-control btn-link" ng-click="carouselPrev(channel, values.videos[0], 'old')">
+					<span class="glyphicon glyphicon-chevron-left"></span>
+				</button>
+				<button type="submit" class="right carousel-control btn-link" ng-click="carouselNext(channel, values.videos[0], 'old')">
+					<span class="glyphicon glyphicon-chevron-right"></span>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-sm-6">
+		<autocomplete ng-model="channelInput" data="suggestedChannels" on-type="searchForChannel" attr-placeholder= "Search Channel"/>
+	</div>
+	<div class="col-sm-6">
+		<button class="btn btn-default" ng-click="addNewChannel()">Add</button>
+	</div>
+</div>

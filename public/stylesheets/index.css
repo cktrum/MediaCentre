@@ -30,3 +30,7 @@
  .carousel-control.right {
   background-image: none;
  }
+
+body { 
+  padding-top: 170px; 
+}

@@ -1,3 +1,5 @@
+// To run the tests, execute 'mocha' from root of project
+
 var supertest 	= require('supertest'),
 	should 		= require('should'),
 	chai    	= require('chai'),
@@ -120,4 +122,122 @@ describe('The youtube API allows:', function () {
 			})
 	})
 	
+})
+
+var parameters = {
+	author: 'Niefers Tri',
+	returnedBook: null
+}
+
+describe('The books API allows', function () {
+	it('PUT /api/books/author to add a new author', function (done) {
+		api.put('/books/author')
+			.send({author: parameters.author})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				done()
+			})
+	})
+
+	it('GET /api/books/author to retrieve all books of an author', function (done) {
+		api.get('/books/author')
+			.query({author: parameters.author})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body.length.should.equal(0)
+				done()
+			})
+	})
+
+	it('GET /api/books/update to get newest updates on all saved authors', function (done) {
+		this.timeout(8000)
+		api.get('/books/update')
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				done()
+			})
+	})
+
+	it('GET /api/books/author to retrieve all books of an author', function (done) {
+		api.get('/books/author')
+			.query({author: parameters.author})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body.length.should.be.above(0)
+				res.body[0].should.have.properties('_id', 'title', 'authors', 'language', 'preorder', 'pubDate', 'isbn', 'thumbnail', 'searchedAuthor') //'description'
+				res.body[0].searchedAuthor.should.equal(parameters.author.toLowerCase())
+				parameters.returnedBook = res.body[1]
+				done()
+			})
+	})
+
+	it('GET /api/books/author supports pagination', function (done) {
+		api.get('/books/author')
+			.query({author: parameters.author, limit: 10, offset: 1})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body.length.should.equal(10)
+				res.body[0].should.have.properties('_id', 'title', 'authors', 'language', 'preorder', 'pubDate', 'isbn', 'thumbnail', 'searchedAuthor') //'description'
+				res.body[0].searchedAuthor.should.equal(parameters.author.toLowerCase())
+				res.body[0].should.containEql(parameters.returnedBook)
+				done()
+			})
+	})
+
+	it('GET /api/books/all to retrieve all saved books', function (done) {
+		api.get('/books/all')
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body.should.have.properties(parameters.author.toLowerCase())
+				res.body[parameters.author.toLowerCase()].length.should.be.above(0)
+				res.body[parameters.author.toLowerCase()][0].should.have.properties('_id', 'title', 'authors', 'language', 'preorder', 'pubDate', 'isbn', 'thumbnail', 'searchedAuthor') //'description'
+				res.body[parameters.author.toLowerCase()][0].searchedAuthor.should.equal(res.body[parameters.author.toLowerCase()][1].searchedAuthor)
+				res.body[parameters.author.toLowerCase()][0].pubDate.should.be.above(res.body[parameters.author.toLowerCase()][1].pubDate)
+				parameters.returnedBook = res.body[parameters.author.toLowerCase()][1]
+				done()
+			})
+	})
+
+	it('GET /api/books/all supports pagination', function (done) {
+		api.get('/books/all')
+			.query({limit: 10, offset: 1})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body.should.have.properties(parameters.author.toLowerCase())
+				res.body[parameters.author.toLowerCase()].length.should.equal(10)
+				res.body[parameters.author.toLowerCase()][0].should.have.properties('_id', 'title', 'authors', 'language', 'preorder', 'pubDate', 'isbn', 'thumbnail', 'searchedAuthor') //'description'
+				res.body[parameters.author.toLowerCase()][0].pubDate.should.be.above(res.body[parameters.author.toLowerCase()][1].pubDate)
+				res.body[parameters.author.toLowerCase()][0].should.containEql(parameters.returnedBook)
+				done()
+			})
+	})
+
+	it('GET /api/books/all to get all books up for preordering', function (done) {
+		api.get('/books/all')
+			.query({preorder: true, published: false})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body[Object.keys(res.body)[0]][0].should.have.properties('_id', 'title', 'authors', 'language', 'preorder', 'pubDate', 'isbn', 'thumbnail') //'description'
+				res.body[Object.keys(res.body)[0]][0].preorder.should.equal(true)
+				done()
+			})
+	})
+
+	it('DELETE /api/books/author to delete an author and all corresponding books', function (done) {
+		api.delete('/books/author')
+			.query({author: parameters.author})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				done()
+			})
+	})
 })

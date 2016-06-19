@@ -320,7 +320,7 @@ exports.getNewVideos = function(req, res) {
 	var offset = req.query.offset
 	var channelID = req.query.channelID
 
-	database.getAPIKey('youtube')
+	database.getAPIKey('Youtube')
 		.then(function (result) {
 			serverkey = result.key
 
@@ -421,18 +421,9 @@ exports.removeChannel = function(req, res) {
 		})
 }
 
-exports.saveKey = function(req, res) {
-	var key = req.body.key
-	var source = 'youtube'
-	database.saveAPIKey(source, key)
-		.then(function (response) {
-			res.json(response).send()
-		})
-}
-
 exports.searchChannel = function(req, res) {
 	if (!serverkey) {
-		database.getAPIKey('youtube')
+		database.getAPIKey('Youtube')
 		.then(function (result) {
 			serverkey = result.key
 

@@ -1,7 +1,8 @@
 var database 	= require('mongoose'),
 	q			= require('q')
 
-var youtubeDB	= require('./youtubeDatabase.js')
+var youtubeDB	= require('./youtubeDatabase.js'),
+	booksDB		= require('./booksDatabase.js')
 
 var keyModel,
 	lastCheckedModel,
@@ -18,6 +19,7 @@ db.once('open', function() {
   	console.log('database connected')
   	init()
   	youtubeDB.init(database)
+  	booksDB.init(database)
 })
 
 /**
@@ -53,11 +55,30 @@ exports.updateLastChecked = function (source, channelID) {
 exports.saveAPIKey = function (source, key) {
 	var deferred = q.defer()
 
-	keyModel.findByIdAndUpdate(source, { key: key }, {upsert: true}, function (err, affectedRows, raw) {
+	keyModel.count({_id: source}, function (err, count) {
 		if (err) {
 			deferred.reject(err)
+		} else if (count == 0) {
+			var newKey = new keyModel({
+				_id: source,
+				key: key
+			})
+
+			newKey.save(function (err) {
+				if (err) {
+					deferred.reject(err)
+				} else {
+					deferred.resolve()
+				}
+			})
 		} else {
-			deferred.resolve(raw)
+			keyModel.findByIdAndUpdate(source, { key: key }, {upsert: true}, function (err, affectedRows, raw) {
+				if (err) {
+					deferred.reject(err)
+				} else {
+					deferred.resolve(raw)
+				}
+			})		
 		}
 	})
 
@@ -83,7 +104,7 @@ exports.getAPIKey = function (source) {
 
 /* #####################################################################
  * 								YOUTUBE
-   ##################################################################### */
+ * ##################################################################### */
 
 exports.getYoutubeChannels = function() {
 	return youtubeDB.getYoutubeChannels()
@@ -103,4 +124,32 @@ exports.getYoutubeVideosForChannel = function (channel, limit, offset) {
 
 exports.saveYoutubeVideos = function (videos) {
 	return youtubeDB.saveYoutubeVideos(videos)
+}
+
+/* #####################################################################
+ * 								BOOKS
+ * ##################################################################### */
+
+exports.saveBooks = function (author, books) {
+	return booksDB.saveBooks(author, books)
+}
+
+exports.saveAuthor = function (author) {
+	return booksDB.saveAuthor(author)
+}
+
+exports.getAllBooks = function (offset, limit, preorder, published) {
+	return booksDB.getAllBooks(offset, limit, preorder, published)
+}
+
+exports.deleteAuthorAndBooks = function (author) {
+	return booksDB.deleteAuthorAndBooks(author)
+}
+
+exports.getBooksForAuthor = function (author, offset, limit, preorder, published) {
+	return booksDB.getBooksForAuthor(author, offset, limit, preorder, published)
+}
+
+exports.getAllSearchedAuthors = function () {
+	return booksDB.getAllSearchedAuthors()
 }

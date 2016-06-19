@@ -19,7 +19,7 @@ function makeSearchAPICall(parameters, page, result) {
 		result = result.concat(body.docs)
 
 		if (body.num_found > result.length) {
-			makeAPICall(parameters, page + 1, result)
+			makeSearchAPICall(parameters, page + 1, result)
 				.then(deferred.resolve)
 				.catch(deferred.reject)
 		} else {
@@ -60,25 +60,44 @@ function searchBooksByAuthor(author) {
 				return {
 					authors: book.author_name,
 					title: book.title,
-					publish_year: book.first_publish_year
+					publish_year: book.first_publish_year,
+					isbns: book.isbn
 				}
 			})
-
-			deferred.resolve(books)
 			
+			getBookDetails(books, 0, [])
+				.then(function (result) {
+					deferred.resolve(result)
+				})
+				.catch(function (error) {
+					console.log(error)
+					deferred.reject(error)
+				})
 		})
 		.catch(deferred.reject)
 
 	return deferred.promise
 }
 
-function getBookDetails(isbn) {
+function getBookDetails(books, index, collectedBooks) {
 	var deferred = q.defer()
+
+	if (index >= books.length) {
+		deferred.resolve(collectedBooks)
+		return deferred.promise
+	}
+
+	if (!books[index].isbns) {
+		getBookDetails(books, index+1, collectedBooks)
+			.then(deferred.resolve)
+			.catch(deferred.reject)
+		return deferred.promise
+	}
 
 	var parameters = {
 		url: booksURL,
 		qs: {
-			bibkeys: 'ISBN:' + isbn,
+			bibkeys: 'ISBN:' + books[index].isbns[0],
 			jscmd: 'data',
 			format: 'json'
 		}
@@ -86,23 +105,27 @@ function getBookDetails(isbn) {
 
 	makeBookAPICall(parameters)
 		.then(function (result) {
-			var books = []
 			for (book in result) {
 				var details = {
-					title: result[book].title,
-					authors: _.map(result[book].authors, function (author) {return author.name}),
-					url: result[book].url,
-					cover: result[book].cover.medium
+					title: result[book].title ? result[book].title : null,
+					authors: result[book].authors ? _.map(result[book].authors, function (author) {return author.name}) : null,
+					url: result[book].url ? result[book].url : null,
+					cover: result[book].cover ? result[book].cover.medium : null,
+					publish_year: books[index].publish_year
 				}
-				books.push(details)
+				collectedBooks.push(details)
 			}
-			deferred.resolve(books)
+
+			getBookDetails(books, index+1, collectedBooks)
+				.then(deferred.resolve)
+				.catch(deferred.reject)
 		})
 		.catch(deferred.reject)
 
 	return deferred.promise
 }
 
-//searchBooksByAuthor('Janet Evanovich')
-getBookDetails(9780375432033)
+searchBooksByAuthor('Janet Evanovich')
 	.then(console.log)
+//getBookDetails(9780375432033)
+//	.then(console.log)

@@ -92,7 +92,7 @@ function booksForAuthor(author) {
 		.then(function (books) {
 			database.saveBooks(author, books)
 				.then(function () {
-					deferred.resolve()
+					deferred.resolve({author: author, books: books})
 				})
 				.catch(deferred.reject)
 		})
@@ -151,8 +151,24 @@ exports.refresh = function (req, res) {
 			}
 
 			q.allSettled(promises)
-				.then(function () {
-					res.sendStatus(200)
+				.then(function (results) {
+					var preorder = {}
+					var published = {}
+					for (var i = 0; i < results.length; i++) {
+						var item = results[i].value
+						for (var j = 0; j < item.books.length; j++) {
+							if (item.books[j].preorder) {
+								if (!preorder[item.author])
+									preorder[item.author] = []
+								preorder[item.author] = preorder[item.author].concat(item.books[j])
+							} else {
+								if (!published[item.author])
+									published[item.author] = []
+								published[item.author] = published[item.author].concat(item.books[j])
+							}
+						}
+					}
+					res.json({preorder: preorder, published: published}).send()
 				})
 				.catch(function (err) {
 					res.json(err).sendStatus(500)

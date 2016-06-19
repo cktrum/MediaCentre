@@ -145,16 +145,3 @@ app.controller('youtubeController', ['$scope', 'youtube', function ($scope, yout
 			}
 		}
 	}])
-/*
-	//---------------
-	// Routes
-	//---------------
-
-	.config(['$routeProvider', function ($routeProvider) {
-		$routeProvider
-		.when('/', {
-			templateUrl: '/overview.html',
-			controller: 'overviewController'
-		})
-	}])
-*/

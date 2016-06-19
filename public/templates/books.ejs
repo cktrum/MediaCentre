@@ -34,7 +34,7 @@
 	<div class="panel-body">
 		<div class="col-md-12" ng-repeat="(author, values) in books.published" ng-show="values.books.length">
 			<h5>
-				{{author}}
+				<b>{{author}}</b>
 				<button type="submit" class="btn btn-link remove-author" ng-click="removeAuthor(author)">
 					<span class="glyphicon glyphicon-remove-circle"></span>
 				</button>
@@ -56,5 +56,12 @@
 				</button>
 			</div>
 		</div>
+	</div>
+</div>
+
+<div class="row">
+	<input class="col-sm-6" ng-model="authorInput" type="text" placeholder="Author Name"></input>
+	<div class="col-sm-6">
+		<button class="btn btn-default" ng-click="addNewAuthor()">Add</button>
 	</div>
 </div>

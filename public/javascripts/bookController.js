@@ -14,11 +14,19 @@ app.factory('googleBooks', ['$http', function ($http) {
 
 		removeAuthor: function (author) {
 			return $http.delete('/api/books/author?author=' + author)
+		},
+
+		addAuthor: function (author) {
+			return $http.put('/api/books/author', { author: author })
+		},
+
+		update: function () {
+			return $http.get('/api/books/update')
 		}
 	}
 }])
 
-app.controller('bookController', ['$scope', 'googleBooks', function ($scope, googleBooks) {
+app.controller('bookController', ['$scope', '$route', 'googleBooks', function ($scope, $route, googleBooks) {
 	$scope.books = {
 		published: {},
 		preorder: {}
@@ -47,7 +55,9 @@ app.controller('bookController', ['$scope', 'googleBooks', function ($scope, goo
 	loadBooks()
 
 	$scope.removeAuthor = function (author) {
-		googleBooks.removeAuthor(author)
+		googleBooks.removeAuthor(author).success(function () {
+			$route.reload()
+		})
 	}
 
 	$scope.carouselPrev = function(author, category) {	
@@ -74,6 +84,16 @@ app.controller('bookController', ['$scope', 'googleBooks', function ($scope, goo
 				$scope.books[category][author].books = $scope.books[category][author].books.concat(data)
 				$scope.books[category][author].offset += move_for
 			}
+		})
+	}
+
+	$scope.addNewAuthor = function() {
+		var author = $scope.authorInput
+		googleBooks.addAuthor(author).success(function (data) {
+			googleBooks.update().success(function (updatedBooks) {
+				$scope.preorder.books = updatedBooks.preorder
+				$scope.published.books = updatedBooks.published
+			})
 		})
 	}
 }])

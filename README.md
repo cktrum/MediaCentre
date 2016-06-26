@@ -10,6 +10,6 @@ A webtool to keep an overview over different medias.
 - Clone repository: ``git clone https://github.com/cktrum/MediaCentre.git``
 - Go to repository: ``cd MediaCentre``
 - Install dependencies: ``(sudo) npm install``
-- Get youtube API key and save in database with ``POST localhost:3000/api/youtube/key``
 - Start application: ``npm start``
 - In browser go to ``localhost:3000``
+- Get API keys and save them via ``localhost:3000/#/settings``

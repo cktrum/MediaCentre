@@ -10,6 +10,10 @@
   font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
   font-weight: 700
 }
+.navbar-right {
+  margin-right: 0px
+}
+
 #mainNav {
 	margin-bottom: 20px;
 }

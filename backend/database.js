@@ -86,6 +86,21 @@ exports.saveAPIKey = function (source, key) {
 }
 
 /**
+ ** Retrieve all keys for an external API
+ **/
+exports.getKeys = function () {
+	var deferred = q.defer()
+	keyModel.find().exec(function (err, result) {
+		if (err) {
+			deferred.reject(err)
+		} else {
+			deferred.resolve(result)
+		}
+	})
+	return deferred.promise
+}
+
+/**
  ** Retrieve the API key for an external API
  ** @param: 	source	- String
  **/

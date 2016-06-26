@@ -29,13 +29,13 @@ router.get('/youtube/channel', youtube.searchChannel)
 router.post('/youtube/channel/new', youtube.addChannel)
 
 /*
- * DELETE /api/youtube/channel/delete
+ * DELETE /api/youtube/channel/delete to delete a youtube channel
  * parameters: id - String
 */
 router.delete('/youtube/channel/delete', youtube.removeChannel)
 
 /*
- * GET /api/books/all
+ * GET /api/books/all to get all books for all saved authors
  * parameters:  limit		- Integer
  *				offset		- Integer
  *				preorder 	- Boolean
@@ -44,7 +44,7 @@ router.delete('/youtube/channel/delete', youtube.removeChannel)
 router.get('/books/all', googleBooks.getAllBooks)
 
 /*
- * GET /api/books/author
+ * GET /api/books/author to get all books for an author
  * parameters: 	author 		- String
  *				limit 		- Integer
  *				offset		- Integer
@@ -53,15 +53,15 @@ router.get('/books/all', googleBooks.getAllBooks)
  */
 router.get('/books/author', googleBooks.getByAuthor)
 
-/* GET /api/books/update */
+/* GET /api/books/update to pull books for all saved books */
 router.get('/books/update', googleBooks.refresh)
 
-/* PUT /api/books/author
+/* PUT /api/books/author to add a new author
  * parameters: author 	- String
  */
 router.put('/books/author', googleBooks.addNewAuthor)
 
-/* DELETE /api/books/author
+/* DELETE /api/books/author to delete an author and all its books
  * parameters: author 	- String
  */
 router.delete('/books/author', googleBooks.deleteAuthorAndAllBooks)
@@ -72,5 +72,8 @@ router.delete('/books/author', googleBooks.deleteAuthorAndAllBooks)
  				key - String
 */
 router.post('/key', keyManagement.saveKey)
+
+/* GET /keys to get all saved keys */
+router.get('/keys', keyManagement.getKeys)
 
 module.exports = router

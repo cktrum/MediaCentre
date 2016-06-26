@@ -10,4 +10,12 @@ app.config(['$routeProvider', function ($routeProvider) {
 				templateUrl: 'templates/books.ejs',
 				controller: 'bookController'
 			})
+			.when('/twitter', {
+				templateUrl: 'templates/twitter.ejs',
+				controller: 'twitterController'
+			})
+			.when('/settings', {
+				templateUrl: 'templates/settings.ejs',
+				controller: 'settingsController'
+			})
 	}])

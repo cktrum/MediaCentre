@@ -19,12 +19,12 @@
 		<script type="text/javascript" src="/javascripts/mainController.js"></script>
 		<script type="text/javascript" src="/javascripts/youtubeController.js"></script>
 		<script type="text/javascript" src="/javascripts/bookController.js"></script>
+		<script type="text/javascript" src="/javascripts/settingsController.js"></script>
 	</head>
 	<body ng-app="app">
 
 		<nav id="mainNav" class="navbar navbar-default navbar-fixed-top">
 			<div class="container-fluid">
-				<!-- Brand and toggle get grouped for better mobile display -->
 				<div class="navbar-header">
 					<p class="navbar-brand"><%= title %></p>
 				</div>
@@ -34,6 +34,9 @@
 		        	<li><a href="#youtube">Youtube</a></li> <!--class="active"-->
 		        	<li><a href="#books">Books</a></li>
 		        	<li><a href="#twitter">Twitter</a></li>
+		      	</ul>
+		      	<ul class="nav navbar-nav navbar-right">
+		      		<li><a href="#settings">Settings</a></li>
 		      	</ul>
 		    </div>
 		</nav>

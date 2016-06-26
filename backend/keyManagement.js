@@ -7,4 +7,17 @@ exports.saveKey = function(req, res) {
 		.then(function (response) {
 			res.json(response).send()
 		})
+		.catch(function (err) {
+			res.json(err).sendStatus(500)
+		})
+}
+
+exports.getKeys = function(req, res) {
+	database.getKeys()
+		.then(function (keys) {
+			res.json(keys).send()
+		})
+		.catch(function (err) {
+			res.json(err).sendStatus(500)
+		})
 }

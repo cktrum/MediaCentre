@@ -1,0 +1,14 @@
+<form class="form-horizontal">
+	<div class="form-group" ng-repeat="(category, content) in categories">
+		<label for="input{{category}}" class="control-label col-xs-2">{{category}}</label>
+		<div class="col-xs-10">
+			<input type="search" class="form-control" ng-model="content.key" placeholder="{{category}} Key" value="{{content.key}}">
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-xs-offset-2 col-xs-10">
+			<button type="submit" class="btn btn-primary" ng-click="saveKeys()">Save</button>
+		</div>
+	</div>
+</form>
+

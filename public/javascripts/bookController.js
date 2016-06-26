@@ -32,11 +32,21 @@ app.controller('bookController', ['$scope', '$route', 'googleBooks', function ($
 		preorder: {}
 	}
 
+	var formatBooks = function (books) {
+		for (var i = 0; i < books.length; i++) {
+			books[i].authors = books[i].authors.join(", ")
+			books[i].pubDate = new Date(books[i].pubDate).toLocaleDateString()
+			books[i].thumbnail = books[i].thumbnail ? books[i].thumbnail : "./../images/placeholder.jpeg"
+		}
+
+		return books
+	}
+
 	var loadBooks = function () {
 		googleBooks.allSavedBooks(6, 0, true, false).success(function (data) {
 			for (author in data) {
 				$scope.books.preorder[author] = {}
-				$scope.books.preorder[author].books = data[author]
+				$scope.books.preorder[author].books = formatBooks(data[author])
 				$scope.books.preorder[author].offset = 6
 				$scope.books.preorder[author].limit = 6
 			}
@@ -45,7 +55,7 @@ app.controller('bookController', ['$scope', '$route', 'googleBooks', function ($
 		googleBooks.allSavedBooks(6, 0, false, true).success(function (data) {
 			for (author in data) {
 				$scope.books.published[author] = {}
-				$scope.books.published[author].books = data[author]
+				$scope.books.published[author].books = formatBooks(data[author])
 				$scope.books.published[author].offset = 6
 				$scope.books.published[author].limit = 6
 			}
@@ -67,6 +77,7 @@ app.controller('bookController', ['$scope', '$route', 'googleBooks', function ($
 
 		if (new_offset >= 0) {
 			googleBooks.booksForAuthor(author, preorder, !preorder, move_for, new_offset).success(function (data) {
+				data = formatBooks(data)
 				$scope.books[category][author].books.splice(-move_for, move_for)
 				$scope.books[category][author].books = data.concat($scope.books[category][author].books)
 				$scope.books[category][author].offset -= move_for
@@ -80,6 +91,7 @@ app.controller('bookController', ['$scope', '$route', 'googleBooks', function ($
 
 		googleBooks.booksForAuthor(author, preorder, !preorder, move_for, $scope.books[category][author].offset).success(function (data) {
 			if (data.length > 0) {
+				data = formatBooks(data)
 				$scope.books[category][author].books.splice(0, Math.min(move_for, data.length))
 				$scope.books[category][author].books = $scope.books[category][author].books.concat(data)
 				$scope.books[category][author].offset += move_for

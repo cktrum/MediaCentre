@@ -28,7 +28,7 @@ function searchByAuthor (author, result, page) {
 			var parameters = {
 				url: baseUrl + 'volumes',
 				qs: {
-					q: author,
+					q: 'inauthor:' + author,
 					orderBy: 'relevance',
 					key: authKey,
 					langRestrict: 'en',
@@ -44,28 +44,39 @@ function searchByAuthor (author, result, page) {
 					body = JSON.parse(body)
 					if (body.items && body.items.length > 0) {
 						var items = _.map(body.items, function (item) {
-							var thumbnail = undefined
-							if (item.volumeInfo.imageLinks && item.volumeInfo.imageLinks.smallThumbnail) {
-								thumbnail = item.volumeInfo.imageLinks.smallThumbnail
-							} else if (item.volumeInfo.imageLinks && item.volumeInfo.imageLinks.thumbnail) {
-								thumbnail = item.volumeInfo.imageLinks.thumbnail
-							}
+							/*
+							var containsAuthor = _.find(item.volumeInfo.authors, function (bookAuthor) {
+								console.log(author, bookAuthor)
+								if (bookAuthor.toLowerCase() == author.toLowerCase())
+									return true
+								else
+									return false
+							})
+							if (containsAuthor) {
+							*/
+								var thumbnail = undefined
+								if (item.volumeInfo.imageLinks && item.volumeInfo.imageLinks.smallThumbnail) {
+									thumbnail = item.volumeInfo.imageLinks.smallThumbnail
+								} else if (item.volumeInfo.imageLinks && item.volumeInfo.imageLinks.thumbnail) {
+									thumbnail = item.volumeInfo.imageLinks.thumbnail
+								}
 
-							var pubDate = undefined
-							if (item.volumeInfo.publishedDate)
-								pubDate = new Date(item.volumeInfo.publishedDate).toISOString()
+								var pubDate = undefined
+								if (item.volumeInfo.publishedDate)
+									pubDate = new Date(item.volumeInfo.publishedDate).toISOString()
 
-							return {
-								id: item.id,
-								title: item.volumeInfo.title,
-								authors: item.volumeInfo.authors,
-								pubDate: pubDate,
-								description: item.volumeInfo.description,
-								isbn: item.volumeInfo.industryIdentifiers && item.volumeInfo.industryIdentifiers.length > 0 ? item.volumeInfo.industryIdentifiers[0].identifier : undefined,
-								thumbnail: thumbnail,
-								language: item.volumeInfo.language,
-								preorder: pubDate && new Date(pubDate).getTime() > Date.now() ? true: false
-							}
+								return {
+									id: item.id,
+									title: item.volumeInfo.title,
+									authors: item.volumeInfo.authors,
+									pubDate: pubDate,
+									description: item.volumeInfo.description,
+									isbn: item.volumeInfo.industryIdentifiers && item.volumeInfo.industryIdentifiers.length > 0 ? item.volumeInfo.industryIdentifiers[0].identifier : undefined,
+									thumbnail: thumbnail,
+									language: item.volumeInfo.language,
+									preorder: pubDate && new Date(pubDate).getTime() > Date.now() ? true: false
+								}
+							//}
 						})
 
 						result = result.concat(items)

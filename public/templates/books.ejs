@@ -12,8 +12,9 @@
 				<div class="carousel-inner">
 					<div class="item" ng-repeat="book in values.books" ng-class="{'active': $index < 6}">
 						<div class="col-xs-2 col-md-2 col-sm-2">
-							<p><img src="{{book.thumbnail}}"/></p>
-							{{book.title}}
+							<p><img ng-src="{{book.thumbnail}}"/></p>
+							<p>{{book.authors}} - {{book.title}}<p>
+							<p>{{book.pubDate}}</p>
 						</div>
 					</div>
 				</div>
@@ -43,8 +44,10 @@
 				<div class="carousel-inner">
 					<div class="item" ng-repeat="book in values.books" ng-class="{'active': $index < 6}">
 						<div class="col-xs-2 col-md-2 col-sm-2">
-							<p><img src="{{book.thumbnail}}"/></p>
-							{{book.title}}
+							<div width="128px" height="193px">
+								<p><img src="{{book.thumbnail}}"/></p>
+							</div>
+							<p>{{book.authors}} - {{book.title}}<p>
 						</div>
 					</div>
 				</div>

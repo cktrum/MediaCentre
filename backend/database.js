@@ -29,6 +29,8 @@ function init () {
 	var keySchema = new database.Schema({
 		_id: String,
 		key: String,
+		consumerKey: String,
+		consumerSecret: String,
 		addedAt: { type: Date, default: Date.now },
 	})
 	keyModel = database.model('key', keySchema)
@@ -52,7 +54,7 @@ exports.updateLastChecked = function (source, channelID) {
  ** @params: 	souce 	- String
  **				key 	- String
  **/
-exports.saveAPIKey = function (source, key) {
+exports.saveAPIKey = function (source, key, consumerKey, consumerSecret) {
 	var deferred = q.defer()
 
 	keyModel.count({_id: source}, function (err, count) {
@@ -61,7 +63,9 @@ exports.saveAPIKey = function (source, key) {
 		} else if (count == 0) {
 			var newKey = new keyModel({
 				_id: source,
-				key: key
+				key: key,
+				consumerKey: consumerKey,
+				consumerSecret: consumerSecret
 			})
 
 			newKey.save(function (err) {

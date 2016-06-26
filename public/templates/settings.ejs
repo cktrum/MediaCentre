@@ -1,12 +1,32 @@
 <form class="form-horizontal">
-	<div class="form-group" ng-repeat="(category, content) in categories">
-		<label for="input{{category}}" class="control-label col-xs-2">{{category}}</label>
-		<div class="col-xs-10">
-			<input type="search" class="form-control" ng-model="content.key" placeholder="{{category}} Key" value="{{content.key}}">
+	<div class = "panel panel-default">
+   		<div class = "panel-heading">
+      		Social Media Sources
+   		</div>
+   		<div class = "panel-body">
+			<div class="form-group" ng-repeat="source in settings.keys">
+				<label for="input{{source.name}}" class="control-label col-xs-2">{{source.name}}</label>
+				<div class="col-xs-10">
+					<input type="search" class="form-control" ng-model="source.key" placeholder="{{source.name}} Key" value="{{source.key}}">
+				</div>
+			</div>
 		</div>
 	</div>
+	<div class = "panel panel-default">
+   		<div class = "panel-heading">
+      		Twitter
+   		</div>
+   		<div class = "panel-body">
+      		<div class="form-group" ng-repeat="source in settings.twitter">
+				<label for="input{{source.name}}" class="control-label col-xs-2">{{source.name}}</label>
+				<div class="col-xs-10">
+					<input type="search" class="form-control" ng-model="source.key" placeholder="Twitter - {{source.name}}" value="{{source.key}}" ng-readonly="{{source.readonly}}">
+				</div>
+			</div>
+   		</div>
+   	</div>
 	<div class="form-group">
-		<div class="col-xs-offset-2 col-xs-10">
+		<div class="col-xs-10">
 			<button type="submit" class="btn btn-primary" ng-click="saveKeys()">Save</button>
 		</div>
 	</div>

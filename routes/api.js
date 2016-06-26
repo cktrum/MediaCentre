@@ -1,7 +1,8 @@
 var express 		= require('express'),
 	youtube 		= require('../backend/youtube.js'),
 	keyManagement	= require('../backend/keyManagement.js'),
-	googleBooks 	= require('../backend/googleBooks.js')
+	googleBooks 	= require('../backend/googleBooks.js'),
+	twitter 		= require('../backend/twitter.js')
 
 var router = express.Router()
 
@@ -65,6 +66,10 @@ router.put('/books/author', googleBooks.addNewAuthor)
  * parameters: author 	- String
  */
 router.delete('/books/author', googleBooks.deleteAuthorAndAllBooks)
+
+router.get('/twitter/auth/initiate', twitter.requestToken)
+router.get('/twitter/auth/authenticate', twitter.authCallback)
+router.get('/twitter/auth/verified', twitter.verifiedCallback)
 
 /*
  * POST /key to upsert API key

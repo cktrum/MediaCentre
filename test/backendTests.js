@@ -241,3 +241,57 @@ describe('The books API allows', function () {
 			})
 	})
 })
+
+describe('The Twitter API allows', function () {
+	it('GET /api/twitter/search/user to search for a user given a search phrase', function (done) {
+		api.get('/twitter/search/user')
+			.query({username: 'bbcr1'})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body.should.be.instanceOf(Array)
+				res.body[0].should.have.properties('id', 'name', 'screen_name')
+				res.body.should.containEql({id: '98767867876', name: 'BBC Radio 1', screen_name: 'bbcr1'})
+				done()
+			})
+	})
+	it('PUT /api/twitter/add/user to add a user', function (done) {
+		api.put('/twitter/add/user')
+			.send({username: 'bbcr1'})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				done()
+			})
+	})
+
+	it('PUT /api/twitter/add/query to add a query', function (done) {
+		api.put('/twitter/add/query')
+			.send({query: 'UK EU since:2016-06-23 until:2016-06-30'})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				done()
+			})
+	})
+
+	it('GET /api/twitter/user to get tweets by a certain user', function (done) {
+		api.get('/twitter/user')
+			.query({id: 'bbcr1'})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				done()
+			})
+	})
+
+	it('GET /api/twitter/query to get tweets for a certain search query', function (done) {
+		api.get('/twitter/query')
+			.query({id: 'q1'})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				done()
+			})
+	})
+})

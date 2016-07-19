@@ -8,6 +8,9 @@ app.factory('twitterFactory', ['$http', function ($http) {
 		},
 		getTweets: function (type, id) {
 			return $http.get('/api/twitter/tweets?type=' + type + '&id=' + id)
+		},
+		addUser: function (username) {
+			return $http.put('/api/twitter/add/user')
 		}
 	}
 }])
@@ -31,6 +34,32 @@ app.controller('twitterController', ['$scope', 'twitterFactory', function ($scop
 			}
 		],
 		tweets: []
+	}
+	$scope.addUserShown = false
+
+	$scope.openSearchUserDialog = function (ev) {
+		$scope.addUserShown = !$scope.addUserShown
+	}
+
+	$scope.openAddQueryDialog = function (ev) {
+		$scope.addQueryShown = !$scope.addQueryShown
+	}
+
+	$scope.searchForUsers = function () {
+		$scope.twitter.suggestedUsers = ['Test1', 'Test2']
+		$scope.twitter.userMapping = {Test1: 'test1', Test2: 'test2'}
+	}
+
+	$scope.addNewUser = function () {
+		var username = $scope.twitter.newUser
+		twitterFactory.addUser(username)
+		$scope.addUserShown = !$scope.addUserShown
+		$scope.twitter.newUser = ""
+		$scope.twitter.users.push({name: username, id: $scope.twitter.userMapping[username]})
+	}
+
+	$scope.addNewQuery = function () {
+		
 	}
 
 	$scope.showUser = function (user) {

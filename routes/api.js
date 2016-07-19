@@ -71,6 +71,22 @@ router.get('/twitter/auth/initiate', twitter.requestToken)
 router.get('/twitter/auth/authenticate', twitter.authCallback)
 router.get('/twitter/auth/verified', twitter.verifiedCallback)
 
+router.get('/twitter/search/user', twitter.searchUser)
+/*
+ * PUT /api/twitter/add to add a new search query
+ * parameters: username - String
+ */
+router.put('/twitter/add/user', twitter.addUser)
+router.put('/twitter/add/query', twitter.addQuery)
+/*
+ * GET /api/twitter/search/tweets get tweets for a particular query
+ * parameters: 	id - String
+ */
+router.get('/twitter/user', twitter.searchTweetsForUser)
+
+router.get('/twitter/query', twitter.searchTweetsForQuery)
+
+
 /*
  * POST /key to upsert API key
  * parameters: 	source - String

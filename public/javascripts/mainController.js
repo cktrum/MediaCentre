@@ -1,4 +1,4 @@
-var app = angular.module('app', ['ngRoute', 'autocomplete'])
+var app = angular.module('app', ['ngRoute', 'autocomplete', 'ngMaterial'])
 
 app.config(['$routeProvider', function ($routeProvider) {
 		$routeProvider

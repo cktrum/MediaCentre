@@ -9,6 +9,7 @@ app.factory('googleBooks', ['$http', function ($http) {
 		},
 
 		booksForAuthor: function (author, preorder, published, limit, offset) {
+			console.log(limit)
 			return $http.get('/api/books/author?author=' + author + '&limit=' + limit + '&offset=' + offset + '&preorder=' + preorder + '&published=' + published)
 		},
 
@@ -103,8 +104,9 @@ app.controller('bookController', ['$scope', '$route', 'googleBooks', function ($
 		var author = $scope.authorInput
 		googleBooks.addAuthor(author).success(function (data) {
 			googleBooks.update().success(function (updatedBooks) {
-				$scope.preorder.books = updatedBooks.preorder
-				$scope.published.books = updatedBooks.published
+				
+				$scope.books.preorder = updatedBooks.preorder
+				$scope.books.published = updatedBooks.published
 			})
 		})
 	}

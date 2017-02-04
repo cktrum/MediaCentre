@@ -202,7 +202,7 @@ exports.deleteAuthorAndBooks = function (author) {
 	return deferred.promise
 }
 
-exports.getBooksForAuthor = function (author, offset, limit, preorder, published) {
+exports.getBooksForAuthor = function (author, offset, limit, preorder, published) {	
 	var deferred = q.defer()
 	getAuthor(author)
 		.then(function (authorObject) {

@@ -1,3 +1,4 @@
+
 .navbar-default {
   background-color: white;
   border-color: rgba(34, 34, 34, 0.05);
@@ -17,6 +18,7 @@
 #mainNav {
 	margin-bottom: 20px;
 }
+
 .small_link {
 	font-size: 10;
 }
@@ -41,4 +43,8 @@ body {
 
 .glyphicon-plus {
   color: gray;
+}
+
+.md-datepicker-calendar-pane {
+  z-index: 10000
 }

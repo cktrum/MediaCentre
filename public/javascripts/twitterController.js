@@ -35,7 +35,9 @@ app.controller('twitterController', ['$scope', 'twitterFactory', function ($scop
 		],
 		tweets: []
 	}
+
 	$scope.addUserShown = false
+	$scope.twitter.newTopic = {}
 
 	$scope.openSearchUserDialog = function (ev) {
 		$scope.addUserShown = !$scope.addUserShown
@@ -59,7 +61,22 @@ app.controller('twitterController', ['$scope', 'twitterFactory', function ($scop
 	}
 
 	$scope.addNewQuery = function () {
-		
+		var query = ""
+		if ($scope.twitter.newTopic.Included) {
+			var includedArray = $scope.twitter.newTopic.Included.split(", ")
+			for (var i = 0; i < includedArray.length; i++) {
+				query = query + '"' + includedArray[i] + '" '
+			}
+		}
+		if ($scope.twitter.newTopic.Excluded) {
+			var excludedArray = $scope.twitter.newTopic.Excluded.split(", ")
+			console.log(excludedArray)
+			for (var i = 0; i < excludedArray.length; i++) {
+				query = query + '-"' + excludedArray[i] + '"'
+			}
+			console.log(query)
+		}
+		$scope.addQueryShown = !$scope.addQueryShown
 	}
 
 	$scope.showUser = function (user) {

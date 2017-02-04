@@ -113,15 +113,15 @@ function booksForAuthor(author) {
 }
 
 exports.getByAuthor = function (req, res) {
-	var offset = 0, preorder = true, published = true, limit = Infinity
+	var offset = 0, preorder = true, published = true, limit = 100
 	if (req.query.offset)
-		offset = req.query.offset
+		offset = parseInt(req.query.offset)
 	if (req.query.preorder)
 		preorder = req.query.preorder
 	if (req.query.published)
 		published = req.query.published
 	if (req.query.limit)
-		limit = req.query.limit
+		limit = parseInt(req.query.limit)
 	var author = req.query.author
 	
 	database.getBooksForAuthor(author, offset, limit, preorder, published)
@@ -134,15 +134,15 @@ exports.getByAuthor = function (req, res) {
 }
 
 exports.getAllBooks = function (req, res) {
-	var offset = 0, preorder = true, published = true, limit = Infinity
+	var offset = 0, preorder = true, published = true, limit = 100
 	if (req.query.offset)
-		offset = req.query.offset
+		offset = parseInt(req.query.offset)
 	if (req.query.preorder)
 		preorder = req.query.preorder
 	if (req.query.published)
 		published = req.query.published
 	if (req.query.limit)
-		limit = req.query.limit
+		limit = parseInt(req.query.limit)
 
 	database.getAllBooks(offset, limit, preorder, published)
 		.then(function (allBooks) {

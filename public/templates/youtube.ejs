@@ -1,3 +1,14 @@
+<div class="row newChannelInput">
+	<div class="col-sm-6">
+		<autocomplete ng-model="channelInput" data="suggestedChannels" on-type="searchForChannel" attr-placeholder= "Search Channel"/>
+	</div>
+	<div class="col-sm-6">
+		<button class="btn btn-default" ng-click="addNewChannel()">Add</button>
+	</div>
+</div>
+
+
+
 <div class="panel panel-default" ng-show="youtube.new_total">
 	<div class="panel-heading">New Videos</div>
 	<div class="panel-body">
@@ -59,14 +70,5 @@
 				</button>
 			</div>
 		</div>
-	</div>
-</div>
-
-<div class="row">
-	<div class="col-sm-6">
-		<autocomplete ng-model="channelInput" data="suggestedChannels" on-type="searchForChannel" attr-placeholder= "Search Channel"/>
-	</div>
-	<div class="col-sm-6">
-		<button class="btn btn-default" ng-click="addNewChannel()">Add</button>
 	</div>
 </div>

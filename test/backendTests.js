@@ -125,7 +125,7 @@ describe('The youtube API allows:', function () {
 })
 
 var parameters = {
-	author: 'Niefers Tri',
+	author: 'Stieg Larsson',
 	returnedBook: null
 }
 

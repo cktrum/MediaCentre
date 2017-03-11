@@ -2,7 +2,8 @@ var database 	= require('mongoose'),
 	q			= require('q')
 
 var youtubeDB	= require('./youtubeDatabase.js'),
-	booksDB		= require('./booksDatabase.js')
+	booksDB		= require('./booksDatabase.js'),
+	twitterDB	= require('./twitterDatabase.js')
 
 var keyModel,
 	lastCheckedModel,
@@ -20,6 +21,7 @@ db.once('open', function() {
   	init()
   	youtubeDB.init(database)
   	booksDB.init(database)
+  	twitterDB.init(database)
 })
 
 /**
@@ -171,4 +173,24 @@ exports.getBooksForAuthor = function (author, offset, limit, preorder, published
 
 exports.getAllSearchedAuthors = function () {
 	return booksDB.getAllSearchedAuthors()
+}
+
+/* #####################################################################
+ * 								TWITTER
+ * ##################################################################### */
+
+exports.addTwitterQuery = function(query, type) {
+	return twitterDB.addQuery(query, type)
+}
+
+exports.getTwitterQueryByID = function(queryID) {
+	return twitterDB.getQueryByID(queryID)
+}
+
+exports.getSavedTwitterQueries = function (type) {
+	return twitterDB.getSavedQueries(type)
+}
+
+exports.removeTwitterQuery = function (id, type) {
+	return twitterDB.removeQuery(id, type)
 }

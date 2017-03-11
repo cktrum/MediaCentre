@@ -1,39 +1,77 @@
 var request 	= require('request'),
 	q 			= require('q'),
+	qs			= require('qs'),
 	database 	= require('./database.js')
 
 var searchTweetsBaseUrl = 'https://api.twitter.com/1.1/search/tweets.json',
 	searchUsersBaseUrl = 'https://api.twitter.com/1.1/users/search.json',
-	bearerToken = null
+	bearerToken = null,
+	consumerKey = null,
+	consumerSecret = null,
+	oauthToken = null,
+	oauthSecret = null
 
 /* -------------------------------------------------------------
  *							OAUTH
  * ------------------------------------------------------------- */
 exports.requestToken = function(req, res) {
-	request.post({
-		url: 'https://api.twitter.com/oauth/request_token',
-		form: {
-			oauth_callback: 'localhost:3000/api/twitter/auth/authenticate'
-		}
-	})
+	authenticate()
+		.then(function () {
+			params = {
+				url: 'https://api.twitter.com/oauth/request_token',
+				oauth: {
+					callback: 'http://localhost:3000/api/twitter/auth/authenticate',
+					consumer_key: consumerKey,
+					consumer_secret: consumerSecret
+				}
+			}
+
+			request.post(params, function (err, response, body) {
+				body = qs.parse(body)
+
+				if (err || response.statusCode != 200) {
+					console.log("error", err)
+				} else if (body.oauth_callback_confirmed != "true") {
+					console.log("callback not confirmed")
+				} else {
+					var token = body.oauth_token
+					oauthSecret = body.token_secret
+
+					path = 'https://api.twitter.com/oauth/authenticate?oauth_token=' + token
+					
+					res.writeHead(302, {'Location': path})
+					res.end()
+				}
+			})
+		})	
 }
 
 exports.authCallback = function (req, res) {
-	if (req.statusCode == 200 && req.body.oauth_callback_confirmed) {
-		var oauth_token = req.body.oauth_token
-		var oauth_token_secret = req.body.oauth_token_secret
-
-		path = 'https://api.twitter.com/oauth/authenticate?oauth_token=' + oauth_token
-
-		res.set('Content-Type', 'application/json')
-		res.send(JSON.stringify({ redirect: path }))
-		res.end()
+	var token = req.query.oauth_token
+	var verifier = req.query.oauth_verifier
+	
+	var params = {
+		url: 'https://api.twitter.com/oauth/access_token',
+		oauth: {
+			token: token,
+			token_secret: oauthSecret,
+			verifier: verifier
+		}
 	}
+
+	request.post(params, function (err, response, body) {
+		if (err || response.statusCode != 200)
+		{
+			console.log(err)
+		} else {
+			body = qs.parse(body)
+			oauthToken = body.oauth_token
+			oauthSecret = body.oauth_token_secret
+		}
+		res.redirect('http://localhost:3000/#/settings')
+	})
 }
 
-exports.verifiedCallback = function (req, res) {
-
-}
 
 function authenticate() {
 	var deferred = q.defer()
@@ -41,6 +79,8 @@ function authenticate() {
 		database.getAPIKey('Twitter')
 			.then(function (result) {
 				bearerToken = result.key
+				consumerKey = result.consumerKey
+				consumerSecret = result.consumerSecret
 				deferred.resolve()
 			})
 	} else {
@@ -56,9 +96,12 @@ function searchTweets(query) {
 	authenticate()
 		.then(function () {
 			var params = {
-				url: searchTweetsBaseUrl + 'q=' + query,
-				headers: {
-					'Authentication': 'Basic ' + bearerToken
+				url: searchTweetsBaseUrl + '?q=' + encodeURIComponent(query),
+				oauth: {
+					consumer_key: consumerKey,
+					consumer_secret: consumerSecret,
+					token: oauthToken,
+					token_secret: oauthSecret
 				}
 			}
 
@@ -66,6 +109,7 @@ function searchTweets(query) {
 				if (err) {
 					deferred.reject(err)
 				} else {
+					body = JSON.parse(body)
 					deferred.resolve(body)
 				}
 			})
@@ -86,8 +130,11 @@ function searchUsers(query) {
 					count: 10,
 					page: 1
 				},
-				headers: {
-					'Authentication': 'Basic ' + bearerToken
+				oauth: {
+					consumer_key: consumerKey,
+					consumer_secret: consumerSecret,
+					token: oauthToken,
+					token_secret: oauthSecret
 				}
 			}
 
@@ -95,6 +142,7 @@ function searchUsers(query) {
 				if (err) {
 					deferred.reject(err)
 				} else {
+					body = JSON.parse(body)
 					deferred.resolve(body)
 				}
 			})
@@ -142,8 +190,9 @@ exports.searchTweetsForQuery = function (req, res) {
 
 exports.addUser = function (req, res) {
 	var query = req.body.username
+	query = 'from:' + query
 
-	database.addTwitterQuery(query)
+	database.addTwitterQuery(query, 'user')
 		.then(function (id) {
 			res.json(id).send()
 		})
@@ -155,7 +204,7 @@ exports.addUser = function (req, res) {
 exports.addQuery = function (req, res) {
 	var query = req.body.query
 
-	database.addTwitterQuery(query)
+	database.addTwitterQuery(query, 'topic')
 		.then(function (id) {
 			res.json(id).send()
 		})
@@ -181,5 +230,49 @@ exports.searchUser = function (req, res) {
 		})
 		.catch(function (err) {
 			res.json(err).sendStatus(500)
+		})
+}
+
+exports.getUsers = function (req, res) {
+	database.getSavedTwitterQueries('user')
+		.then(function (result) {
+			res.json(result).send()
+		})
+		.catch(function (err) {
+			res.json(err).send()
+		})
+}
+
+exports.getTopics = function (req, res) {
+	database.getSavedTwitterQueries('topic')
+		.then(function (result) {
+			res.json(result).send()
+		})
+		.catch(function (err) {
+			res.json(err).send()
+		})
+}
+
+exports.removeUser = function (req, res) {
+	var id = req.query.id
+
+	database.removeTwitterQuery(id, 'user')
+		.then(function (resp) {
+			res.sendStatus(200)
+		})
+		.catch(function (err) {
+			res.json(err).send()
+		})
+}
+
+exports.removeTopic = function (req, res) {
+	var id = req.query.id
+
+	database.removeTwitterQuery(id, 'topic')
+		.then(function (resp) {
+			res.sendStatus(200)
+		})
+		.catch(function (err) {
+			res.json(err).send()
 		})
 }

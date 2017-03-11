@@ -242,6 +242,11 @@ describe('The books API allows', function () {
 	})
 })
 
+var params = {
+	id_user: null,
+	id_query: null
+}
+
 describe('The Twitter API allows', function () {
 	it('GET /api/twitter/search/user to search for a user given a search phrase', function (done) {
 		api.get('/twitter/search/user')
@@ -251,7 +256,7 @@ describe('The Twitter API allows', function () {
 				should.not.exist(err)
 				res.body.should.be.instanceOf(Array)
 				res.body[0].should.have.properties('id', 'name', 'screen_name')
-				res.body.should.containEql({id: '98767867876', name: 'BBC Radio 1', screen_name: 'bbcr1'})
+				res.body.should.containEql({id: 7111412, name: 'BBC Radio 1', screen_name: 'BBCR1'})
 				done()
 			})
 	})
@@ -261,23 +266,83 @@ describe('The Twitter API allows', function () {
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
+				res.body.should.be.instanceOf(Number)
+				id_user = res.body
 				done()
 			})
 	})
 
 	it('PUT /api/twitter/add/query to add a query', function (done) {
 		api.put('/twitter/add/query')
-			.send({query: 'UK EU since:2016-06-23 until:2016-06-30'})
+			.send({query: 'Joko Klaas since:2017-03-04'})
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
+				res.body.should.be.instanceOf(Number)
+				id_query = res.body
+				done()
+			})
+	})
+
+	it('GET /api/twitter/users to get all saved users', function (done) {
+		api.get('/twitter/users')
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body.should.be.instanceOf(Array)
+				res.body[0].should.have.properties('id', 'query', 'type')
+				res.body.should.matchAny({'id': id_user, 'query': 'from:bbcr1', 'type': 'user'})
+				done()
+			})
+	})
+
+	it('GET /api/twitter/topics to get all saved topic queries', function (done) {
+		api.get('/twitter/topics')
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body.should.be.instanceOf(Array)
+				res.body[0].should.have.properties('id', 'query', 'type')
 				done()
 			})
 	})
 
 	it('GET /api/twitter/user to get tweets by a certain user', function (done) {
 		api.get('/twitter/user')
-			.query({id: 'bbcr1'})
+			.query({id: id_user})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body.should.have.property('statuses')
+				res.body.statuses.should.be.instanceOf(Array)
+				res.body.statuses[0].should.have.properties('id', 'text', 'user')
+				res.body.statuses[0].user.should.have.properties('id', 'name', 'screen_name')
+				res.body.statuses[0].user.name.should.equal('BBC Radio 1')
+				done()
+			})
+	})
+
+	it('GET /api/twitter/query to get tweets for a certain search query', function (done) {
+		api.get('/twitter/query')
+			.query({id: id_query})
+			.expect(200)
+			.end(function (err, res) {
+				should.not.exist(err)
+				res.body.should.have.property('statuses')
+				res.body.statuses.should.be.instanceOf(Array)
+				res.body.statuses[0].should.have.properties('created_at', 'id', 'text', 'user')
+				res.body.statuses.should.matchEach(function (item) {
+					date = new Date(item.created_at)
+					start_date = new Date("2017-03-04")
+					date.should.be.aboveOrEqual(start_date)
+				})
+				done()
+			})
+	})
+
+	it('DELETE /api/twitter/user to delete saved user', function (done) {
+		api.delete('/twitter/user')
+			.query({id: id_user})
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
@@ -285,9 +350,9 @@ describe('The Twitter API allows', function () {
 			})
 	})
 
-	it('GET /api/twitter/query to get tweets for a certain search query', function (done) {
-		api.get('/twitter/query')
-			.query({id: 'q1'})
+	it('DELETE /api/twitter/topic to delete a saved topic', function (done) {
+		api.delete('/twitter/topic')
+			.query({id: id_query})
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)

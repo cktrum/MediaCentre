@@ -1,11 +1,14 @@
-var database = require('./database.js')
+var database = require('./database.js'),
+	q 		 = require('q'),
+	btoa	 = require('btoa'),
+	request  = require('request')
 
 exports.saveKey = function(req, res) {
 	var key = req.body.key
 	var source = req.body.source
 
 	if (source == 'Twitter') {
-		if (key.bearer) {
+		if (key.bearer.key) {
 			database.saveAPIKey(source, key.bearer, key.key, key.secret)
 				.then(function (response) {
 					res.json(response).send()
@@ -53,7 +56,7 @@ function obtainBearerToken (consumerKey, consumerSecret) {
 	var credentials = encode(consumerKey, consumerSecret)
 	issueBearerToken(credentials)
 		.then(function (bearerToken) {
-			saveBearerToken(credentials, consumerKey, consumerSecret)
+			saveBearerToken(bearerToken, consumerKey.key, consumerSecret.key)
 				.then(function (bearerToken) {
 					deferred.resolve(bearerToken)
 				})
@@ -64,11 +67,11 @@ function obtainBearerToken (consumerKey, consumerSecret) {
 }
 
 function encode(consumerKey, consumerSecret) {
-	consumerKey = encodeURIComponent(consumerKey)
-	consumerSecret = encodeURIComponent(consumerSecret)
+	consumerKey = encodeURIComponent(consumerKey.key)
+	consumerSecret = encodeURIComponent(consumerSecret.key)
 	var credentials = consumerKey + ':' + consumerSecret
 	credentials = btoa(credentials)
-
+	
 	return credentials
 }
 
@@ -76,21 +79,21 @@ function issueBearerToken (credentials) {
 	var deferred = q.defer()
 
 	var params = {
-		url: 'https://api.twitter.com/oauth2/token',
-		headers: {
-			'Authentication': 'Basic ' + credentials,
+		'url': 'https://api.twitter.com/oauth2/token',
+		'method': 'POST',
+		'headers': {
+			'Authorization': 'Basic ' + credentials,
 			'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
 		},
-		form: {
-			'grant_type': 'client_credentials'
-		}
+		'body': 'grant_type=client_credentials'
 	}
 
-	request(params, function (err, response, body) {
+	request.post(params, function (err, response, body) {
 		if (err || response.statusCode != 200) {
-			console.log(err)
+			console.log("error", err)
 			deferred.reject(err)
 		} else {
+			body = JSON.parse(body)
 			if (body.token_type == 'bearer') {
 				var token = body.access_token
 				deferred.resolve(token)

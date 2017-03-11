@@ -1,4 +1,4 @@
-app.factory('keysFactory', ['$http', function ($http) {
+app.factory('httpFactory', ['$http', function ($http) {
 	return {
 		getKeys: function () {
 			return $http.get('/api/keys')
@@ -6,11 +6,15 @@ app.factory('keysFactory', ['$http', function ($http) {
 
 		saveKey: function (key, source) {
 			return $http.post('/api/key', {source: source, key: key})
+		},
+
+		signIn: function () {
+			return $http.get('/api/twitter/auth/initiate')
 		}
 	}
 }])
 
-app.controller('settingsController', ['$scope', 'keysFactory', function ($scope,  keysFactory) {
+app.controller('settingsController', ['$scope', 'httpFactory', function ($scope,  httpFactory) {
 	$scope.settings = {}
 	$scope.settings.keys = {
 		Youtube: {
@@ -41,7 +45,7 @@ app.controller('settingsController', ['$scope', 'keysFactory', function ($scope,
 		}
 	}
 
-	keysFactory.getKeys().success(function (data) {
+	httpFactory.getKeys().success(function (data) {
 		for (var i = 0; i < data.length; i++) {
 			if (data[i]._id == 'Twitter') {
 				$scope.settings.twitter.Bearer.key = data[i].key
@@ -55,7 +59,7 @@ app.controller('settingsController', ['$scope', 'keysFactory', function ($scope,
 
 	$scope.saveKeys = function () {
 		for (var source in $scope.settings.keys) {
-			keysFactory.saveKey($scope.settings.keys[source].key, source)
+			httpFactory.saveKey($scope.settings.keys[source].key, source)
 		}
 
 		var twitterKey = {
@@ -63,6 +67,10 @@ app.controller('settingsController', ['$scope', 'keysFactory', function ($scope,
 			key: $scope.settings.twitter.ConsumerKey,
 			secret: $scope.settings.twitter.ConsumerSecret
 		}
-		keysFactory.saveKey(twitterKey, 'Twitter')
+		httpFactory.saveKey(twitterKey, 'Twitter')
+	}
+
+	$scope.signInWithTwitter = function() {
+		httpFactory.signIn()
 	}
 }])

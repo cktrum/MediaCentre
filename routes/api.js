@@ -69,7 +69,6 @@ router.delete('/books/author', googleBooks.deleteAuthorAndAllBooks)
 
 router.get('/twitter/auth/initiate', twitter.requestToken)
 router.get('/twitter/auth/authenticate', twitter.authCallback)
-router.get('/twitter/auth/verified', twitter.verifiedCallback)
 
 router.get('/twitter/search/user', twitter.searchUser)
 /*
@@ -80,12 +79,27 @@ router.put('/twitter/add/user', twitter.addUser)
 router.put('/twitter/add/query', twitter.addQuery)
 /*
  * GET /api/twitter/search/tweets get tweets for a particular query
- * parameters: 	id - String
+ * parameters: 	id - Number
  */
 router.get('/twitter/user', twitter.searchTweetsForUser)
 
 router.get('/twitter/query', twitter.searchTweetsForQuery)
 
+/*
+ * GET /api/twitter/users to get all saved users
+ */
+router.get('/twitter/users', twitter.getUsers)
+/*
+ * GET /api/twitter/topics to get all saved topics
+ */
+router.get('/twitter/topics', twitter.getTopics)
+
+/*
+ * DELETE /api/twitter/user to delete a saved user
+ * parameters: id - Number
+ */
+router.delete('/twitter/user', twitter.removeUser)
+router.delete('/twitter/topic', twitter.removeTopic)
 
 /*
  * POST /key to upsert API key

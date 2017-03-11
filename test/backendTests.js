@@ -262,7 +262,7 @@ describe('The Twitter API allows', function () {
 	})
 	it('PUT /api/twitter/add/user to add a user', function (done) {
 		api.put('/twitter/add/user')
-			.send({username: 'bbcr1'})
+			.send({title: 'BBC Radio 1', username: 'bbcr1'})
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
@@ -274,7 +274,7 @@ describe('The Twitter API allows', function () {
 
 	it('PUT /api/twitter/add/query to add a query', function (done) {
 		api.put('/twitter/add/query')
-			.send({query: 'Joko Klaas since:2017-03-04'})
+			.send({title: 'Joko and Klaas', query: 'Joko Klaas since:2017-03-04'})
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
@@ -290,8 +290,8 @@ describe('The Twitter API allows', function () {
 			.end(function (err, res) {
 				should.not.exist(err)
 				res.body.should.be.instanceOf(Array)
-				res.body[0].should.have.properties('id', 'query', 'type')
-				res.body.should.matchAny({'id': id_user, 'query': 'from:bbcr1', 'type': 'user'})
+				res.body[0].should.have.properties('id', 'title', 'query', 'type')
+				res.body.should.matchAny({'id': id_user, 'title': 'BBC Radio 1', 'query': 'bbcr1', 'type': 'user'})
 				done()
 			})
 	})
@@ -302,7 +302,7 @@ describe('The Twitter API allows', function () {
 			.end(function (err, res) {
 				should.not.exist(err)
 				res.body.should.be.instanceOf(Array)
-				res.body[0].should.have.properties('id', 'query', 'type')
+				res.body[0].should.have.properties('id', 'title', 'query', 'type')
 				done()
 			})
 	})
@@ -313,11 +313,10 @@ describe('The Twitter API allows', function () {
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
-				res.body.should.have.property('statuses')
-				res.body.statuses.should.be.instanceOf(Array)
-				res.body.statuses[0].should.have.properties('id', 'text', 'user')
-				res.body.statuses[0].user.should.have.properties('id', 'name', 'screen_name')
-				res.body.statuses[0].user.name.should.equal('BBC Radio 1')
+				res.body.should.be.instanceOf(Array)
+				res.body[0].should.have.properties('id', 'text', 'user')
+				res.body[0].user.should.have.properties('id', 'name', 'screen_name')
+				res.body[0].user.name.should.equal('BBC Radio 1')
 				done()
 			})
 	})
@@ -328,10 +327,9 @@ describe('The Twitter API allows', function () {
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
-				res.body.should.have.property('statuses')
-				res.body.statuses.should.be.instanceOf(Array)
-				res.body.statuses[0].should.have.properties('created_at', 'id', 'text', 'user')
-				res.body.statuses.should.matchEach(function (item) {
+				res.body.should.be.instanceOf(Array)
+				res.body[0].should.have.properties('created_at', 'id', 'text', 'user')
+				res.body.should.matchEach(function (item) {
 					date = new Date(item.created_at)
 					start_date = new Date("2017-03-04")
 					date.should.be.aboveOrEqual(start_date)
@@ -346,7 +344,15 @@ describe('The Twitter API allows', function () {
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
-				done()
+				api.get('/twitter/users')
+					.expect(200)
+					.end(function (err, res) {
+						should.not.exist(err)
+						res.body.should.not.matchAny(function (item) {
+							item.id == id_user
+						})
+						done()
+					})
 			})
 	})
 
@@ -356,7 +362,15 @@ describe('The Twitter API allows', function () {
 			.expect(200)
 			.end(function (err, res) {
 				should.not.exist(err)
-				done()
+				api.get('/twitter/topics')
+					.expect(200)
+					.end(function (err, res) {
+						should.not.exist(err)
+						res.body.should.not.matchAny(function (item) {
+							item.id == id_query
+						})
+						done()
+					})
 			})
 	})
 })

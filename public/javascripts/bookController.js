@@ -9,7 +9,6 @@ app.factory('googleBooks', ['$http', function ($http) {
 		},
 
 		booksForAuthor: function (author, preorder, published, limit, offset) {
-			console.log(limit)
 			return $http.get('/api/books/author?author=' + author + '&limit=' + limit + '&offset=' + offset + '&preorder=' + preorder + '&published=' + published)
 		},
 

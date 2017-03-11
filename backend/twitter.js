@@ -110,7 +110,15 @@ function searchTweets(query) {
 					deferred.reject(err)
 				} else {
 					body = JSON.parse(body)
-					deferred.resolve(body)
+					var result = body.statuses.map(function (item) {
+						return {
+							id: item.id,
+							created_at: item.created_at,
+							text: item.text,
+							user: item.user
+						}
+					})
+					deferred.resolve(result)
 				}
 			})
 		})
@@ -190,9 +198,9 @@ exports.searchTweetsForQuery = function (req, res) {
 
 exports.addUser = function (req, res) {
 	var query = req.body.username
-	query = 'from:' + query
+	var title = req.body.title
 
-	database.addTwitterQuery(query, 'user')
+	database.addTwitterQuery(title, query, 'user')
 		.then(function (id) {
 			res.json(id).send()
 		})
@@ -203,8 +211,9 @@ exports.addUser = function (req, res) {
 
 exports.addQuery = function (req, res) {
 	var query = req.body.query
+	var title = req.body.title
 
-	database.addTwitterQuery(query, 'topic')
+	database.addTwitterQuery(title, query, 'topic')
 		.then(function (id) {
 			res.json(id).send()
 		})

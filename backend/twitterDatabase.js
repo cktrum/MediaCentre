@@ -5,6 +5,7 @@ var twitterQueryModel
 exports.init = function(database) {
 	var twitterQuerySchema = new database.Schema({
 		_id: Number,
+		title: String,
 		query: String,
 		type: String,
 		addedAt: { type: Date, default: Date.now }
@@ -12,12 +13,15 @@ exports.init = function(database) {
 	twitterQueryModel = database.model('twitterQuery', twitterQuerySchema)
 }
 
-exports.addQuery = function (query, type) {
+exports.addQuery = function (title, query, type) {
 	var deferred = q.defer()
+	
 	var data = {
+		title: title,
 		query: query,
 		type: type
 	}
+
 	var id = hashCode(type + query)
 
 	twitterQueryModel.findByIdAndUpdate(id, data, {upsert: true}, function(err, post) {
@@ -39,7 +43,12 @@ exports.getQueryByID = function (queryID) {
 			deferred.reject(err)
 		}
 
-		deferred.resolve(resp.query)
+		var query = resp.query
+		if (resp.type == 'user') {
+			query = 'from:' + query
+		}
+
+		deferred.resolve(query)
 	})
 
 	return deferred.promise
@@ -53,15 +62,14 @@ exports.getSavedQueries = function (type) {
 			if (err) {
 				deferred.reject(err)
 			} else {
-				console.log(JSON.stringify(result, null, 2))
 				var queries = result.map(function (item) {
 					return {
 						'id': item['_id'],
+						'title': item.title,
 						'type': item.type,
 						'query': item.query
 					}
 				})
-				console.log(JSON.stringify(queries, null, 2))
 				deferred.resolve(queries)
 			}
 		})
@@ -72,7 +80,7 @@ exports.getSavedQueries = function (type) {
 exports.removeQuery = function (id, type) {
 	var deferred = q.defer()
 
-	twitterQueryModel.findOneAndRemove({_id: id, type: type}, function (err, resp) {
+	twitterQueryModel.remove({_id: id}, function (err, resp) {
 		if (err) {
 			deferred.reject(err)
 		} else {

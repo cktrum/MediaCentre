@@ -179,8 +179,8 @@ exports.getAllSearchedAuthors = function () {
  * 								TWITTER
  * ##################################################################### */
 
-exports.addTwitterQuery = function(query, type) {
-	return twitterDB.addQuery(query, type)
+exports.addTwitterQuery = function(title, query, type) {
+	return twitterDB.addQuery(title, query, type)
 }
 
 exports.getTwitterQueryByID = function(queryID) {

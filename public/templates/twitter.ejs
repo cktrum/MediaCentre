@@ -14,11 +14,18 @@
 		      	</div>
    				</div>
    			</div>
-   			<button ng-repeat="user in twitter.users" type="button" class="btn btn-link list-group-item" ng-click="showUser(user)">
-      		<p class="list-group-item-text">
-	        	{{user.name}}
-	      	</p>
-   			</button>
+   			<div ng-repeat="user in twitter.users" class="list-group-item">
+   				<div class="row">
+		      		<div class="col-xs-9 btn" type="button" ng-click="showUser(user)">
+			        	{{user.title}}
+			      	</div>
+			      	<div class="col-xs-3">
+			      		<button type="submit" class="btn btn-link" ng-click="removeUser(user)">
+			      			<span class="glyphicon glyphicon-remove-circle"></span>
+						</button>
+			      	</div>
+   				</div>
+   			</div>
 			</div>
 
 			<div class="list-group-item">
@@ -33,15 +40,22 @@
 		      </div>
       	</div>
    		</div>
-   		<button ng-repeat="topic in twitter.topics" type="button" class="btn btn-link list-group-item" ng-click="showTopic(topic)">
-    		<p class="list-group-item-text">
-        	{{topic.name}}
-      	</p>
- 			</button>
+   		<div ng-repeat="topic in twitter.topics" class="list-group-item">
+    		<div class="row">
+    			<div class="col-xs-9 btn" type="button" ng-click="showTopic(topic)">
+        			{{topic.title}}
+        		</div>
+        		<div class="col-xs-3">
+        			<button type="submit" class="btn btn-link" ng-click="removeTopic(topic)">
+		      			<span class="glyphicon glyphicon-remove-circle"></span>
+					</button>
+        		</div>
+      		</div>
+ 		</div>
 		</div>
 		<div class="col-xs-9">
 			<div ng-repeat="tweet in twitter.tweets">
-				{{tweet.name}}
+				{{tweet.text}}
 			</div>
 		</div>
 	</div>
@@ -55,27 +69,33 @@
 		<h4>Add a query</h4>
 		<form class="form-horizontal">
 			<div class="form-group">
+				<label for="inputTitle" class="control-label col-xs-2">Title</label>
+				<div class="col-xs-10">
+					<input type="text" class="form-control" id="inputTitle" ng-model="twitter.newTopic.Title" placeholder="Title of Query">
+				</div>
+			</div>
+			<div class="form-group">
 				<label for="inputInclude" class="control-label col-xs-2">Include</label>
 				<div class="col-xs-10">
-					<input type="text" class="form-control" id="inputInclude" ng-model="twitter.newTopic.Included" placeholder="Included Terms">
+					<input type="text" class="form-control" id="inputInclude" ng-model="twitter.newTopic.Included" placeholder="Included Terms (Comma separated)">
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="inputExclude" class="control-label col-xs-2">Exclude</label>
 				<div class="col-xs-10">
-					<input type="text" class="form-control" id="inputExclude" ng-model="twitter.newTopic.Excluded" placeholder="Excluded Terms">
+					<input type="text" class="form-control" id="inputExclude" ng-model="twitter.newTopic.Excluded" placeholder="Excluded Terms (Comma separated)">
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="inputHashtag" class="control-label col-xs-2">Include #'s</label>
 				<div class="col-xs-10">
-					<input type="text" class="form-control" id="inputHashtag" ng-model="twitter.newTopic.Hashtag" placeholder="Included Hashtags">
+					<input type="text" class="form-control" id="inputHashtag" ng-model="twitter.newTopic.Hashtag" placeholder="Included Hashtags (Comma separated)">
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="inputMention" class="control-label col-xs-2">Mentioning</label>
 				<div class="col-xs-10">
-					<input type="text" class="form-control" id="inputMention" ng-model="twitter.newTopic.Mention" placeholder="Mentioned User Account">
+					<input type="text" class="form-control" id="inputMention" ng-model="twitter.newTopic.Mention" placeholder="Mentioned User Account (Comma separated)">
 				</div>
 			</div>
 			<div class="form-group">

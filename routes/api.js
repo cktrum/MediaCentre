@@ -67,6 +67,7 @@ router.put('/books/author', googleBooks.addNewAuthor)
  */
 router.delete('/books/author', googleBooks.deleteAuthorAndAllBooks)
 
+router.get('/twitter/auth/check', twitter.checkSignIn)
 router.get('/twitter/auth/initiate', twitter.requestToken)
 router.get('/twitter/auth/authenticate', twitter.authCallback)
 

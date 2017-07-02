@@ -11,6 +11,18 @@ var searchTweetsBaseUrl = 'https://api.twitter.com/1.1/search/tweets.json',
 	oauthToken = null,
 	oauthSecret = null
 
+exports.checkSignIn = function (req, res) {
+	var deferred = q.defer()
+
+	if (!oauthToken || !oauthSecret) {
+		var path = 'http://localhost:3000/api/twitter/auth/initiate'
+		res.writeHead(302, {'Location': path})
+		res.send()
+	} else {
+		res.sendStatus(200)
+	}
+}
+
 /* -------------------------------------------------------------
  *							OAUTH
  * ------------------------------------------------------------- */
@@ -68,7 +80,7 @@ exports.authCallback = function (req, res) {
 			oauthToken = body.oauth_token
 			oauthSecret = body.oauth_token_secret
 		}
-		res.redirect('http://localhost:3000/#/settings')
+		res.redirect('http://localhost:3000/')
 	})
 }
 
@@ -96,7 +108,7 @@ function searchTweets(query) {
 	authenticate()
 		.then(function () {
 			var params = {
-				url: searchTweetsBaseUrl + '?q=' + encodeURIComponent(query),
+				url: searchTweetsBaseUrl + '?q=' + encodeURIComponent(query) + '&tweet_mode=extended',
 				oauth: {
 					consumer_key: consumerKey,
 					consumer_secret: consumerSecret,
@@ -110,11 +122,17 @@ function searchTweets(query) {
 					deferred.reject(err)
 				} else {
 					body = JSON.parse(body)
+
 					var result = body.statuses.map(function (item) {
+						var text = item.full_text
+						if (item.retweeted_status) {
+							text = item.retweeted_status.full_text
+						}
+
 						return {
 							id: item.id,
 							created_at: item.created_at,
-							text: item.text,
+							text: text,
 							user: item.user
 						}
 					})

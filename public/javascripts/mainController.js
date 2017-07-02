@@ -1,7 +1,11 @@
-var app = angular.module('app', ['ngRoute', 'autocomplete', 'ngMaterial'])
+var app = angular.module('app', ['ngRoute', 'autocomplete', 'ngSanitize'])
 
 app.config(['$routeProvider', function ($routeProvider) {
 		$routeProvider
+			.when('/home', {
+				templateUrl: 'templates/home.ejs',
+				controller: 'homeController'
+			})
 			.when('/youtube', {
 				templateUrl: 'templates/youtube.ejs',
 				controller: 'youtubeController'

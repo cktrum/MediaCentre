@@ -43,7 +43,10 @@ app.controller('twitterController', ['$scope', 'twitterFactory', function ($scop
 
 	var loadData = function () {
 		twitterFactory.getUsers().success(function (users) {
-			$scope.twitter.users = users	
+			$scope.twitter.users = users
+			$scope.twitter.users.map(function (item) {
+				//item.text = $filter('linky')(item.text)
+			})
 		})
 		twitterFactory.getTopics().success(function (topics) {
 			$scope.twitter.topics = topics

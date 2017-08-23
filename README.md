@@ -3,7 +3,7 @@ A webtool to keep an overview over different medias.
 
 ## Getting Started
 - Install NodeJS (and npm): 
-  - Unix: ``sudo apt-get install nodejs-legacy npm`` ``sudo apt-get install npm``
+  - Unix: ``sudo apt-get install nodejs-legacy npm``
   - Windows: https://nodejs.org/
 - Install MongoDB:
   - Follow Guide: https://docs.mongodb.org/manual/installation/
